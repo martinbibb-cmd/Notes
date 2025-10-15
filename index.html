@@ -1,1081 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Depot Notes – Quick Picker</title>
-<meta name="theme-color" content="#0b0d10" />
-<style>
-  :root{
-    --bg:#0b0d10; --panel:#13171c; --ink:#e9eef5; --muted:#9fb0c2; --line:#202833;
-    --accent:#4aa3ff; --ok:#3ecf8e; --warn:#ffc247; --bad:#ff6b6b; --chip:#1b222b;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
-  header{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:linear-gradient(0deg,#0b0d10,#0d1014);}
-  header h1{margin:0;font-size:16px;font-weight:600;letter-spacing:0.2px}
-  .row{display:flex;gap:12px;align-items:center}
-  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--chip);color:var(--ink);cursor:pointer;user-select:none}
-  .pill input{display:none}
-  .pill.active{outline:2px solid var(--accent)}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#0f1318;color:var(--ink);cursor:pointer}
-  .btn.primary{background:var(--accent);color:#06111e;border-color:transparent}
-  .btn.ghost{background:transparent}
-  .btn.block{width:100%;justify-content:center}
-  .wrap{max-width:1100px;margin:0 auto;padding:14px}
-  .grid{display:grid;grid-template-columns:1fr;gap:12px}
-  @media (min-width:980px){ .grid{grid-template-columns: 1.2fr 1fr;} }
-  section.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-  section.panel h2{margin:0 0 10px 0;font-size:15px;font-weight:600;color:#d6e2f0}
-  .muted{color:var(--muted);font-size:13px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .search{display:flex;gap:8px;align-items:center;background:#0f1318;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px}
-  .search input{flex:1;background:transparent;border:none;color:var(--ink);font-size:15px;outline:none}
-  .stepper{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
-  .step{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:#0f1318;cursor:pointer;font-size:13px;color:var(--muted)}
-  .step.active{background:var(--accent);color:#031223;border-color:transparent}
-  .columns{display:grid;grid-template-columns:1fr;gap:12px}
-  @media (min-width:700px){ .columns{grid-template-columns:1fr 1fr;} }
-  textarea.copy{width:100%;min-height:120px;background:#0f1318;border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:10px;resize:vertical;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
-  .copybar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 4px}
-  .small{font-size:12px}
-  .tag{padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:#0f1318;color:var(--muted);font-size:12px}
-  .spacer{height:8px}
-  /* Drawer */
-  .drawer{position:fixed;inset:auto 0 0 0;background:var(--panel);border-top:1px solid var(--line);border-radius:16px 16px 0 0;padding:14px;transform:translateY(100%);transition:transform .25s ease;z-index:10;max-height:80vh;overflow:auto}
-  .drawer.open{transform:translateY(0%)}
-  .drawer h3{margin:0 0 8px 0;font-size:14px}
-  .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .switch{display:flex;align-items:center;gap:8px}
-  .switch input{accent-color:var(--accent)}
-  .thin{border:1px dashed var(--line);border-radius:12px;padding:10px}
-  .right{margin-left:auto}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System Transition Matrix</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0d10;
+      --panel: #141920;
+      --ink: #f2f5f9;
+      --muted: #9fb0c2;
+      --accent: #4aa3ff;
+      --line: rgba(255, 255, 255, 0.08);
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(74, 163, 255, 0.12), transparent 60%), var(--bg);
+      color: var(--ink);
+      display: flex;
+      justify-content: center;
+      padding: 48px 16px 96px;
+    }
+
+    main {
+      width: min(1100px, 100%);
+      display: grid;
+      gap: 24px;
+    }
+
+    header {
+      text-align: center;
+      padding: 24px;
+      border-radius: 20px;
+      background: rgba(20, 25, 32, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 4vw, 2.6rem);
+      letter-spacing: 0.4px;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      gap: 20px;
+    }
+
+    @media (min-width: 960px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    section {
+      background: rgba(20, 25, 32, 0.92);
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 16px;
+    }
+
+    section h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: 0.2px;
+    }
+
+    label {
+      display: grid;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    select {
+      appearance: none;
+      background: rgba(9, 12, 16, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px;
+      font: inherit;
+      color: var(--ink);
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(74, 163, 255, 0.25);
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .result-box {
+      background: rgba(9, 12, 16, 0.8);
+      border-radius: 14px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      align-items: flex-start;
+    }
+
+    .result {
+      flex: 1;
+      min-height: 48px;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: 600 1rem/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      resize: none;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .result[aria-busy="true"]::placeholder {
+      color: var(--muted);
+    }
+
+    button.copy-btn,
+    button#copyAllBtn {
+      background: linear-gradient(135deg, rgba(74, 163, 255, 0.85), rgba(74, 163, 255, 0.6));
+      border: none;
+      color: #06111f;
+      font: 600 0.95rem/1 "Inter", sans-serif;
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button.copy-btn:active,
+    button#copyAllBtn:active {
+      transform: translateY(1px);
+    }
+
+    button.copy-btn:hover,
+    button#copyAllBtn:hover {
+      filter: brightness(1.05);
+    }
+
+    button.copy-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      filter: none;
+      transform: none;
+    }
+
+    .footer-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      padding: 0 8px 32px;
+    }
+
+    .status {
+      min-height: 20px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .status[data-state="success"] {
+      color: #3ecf8e;
+    }
+
+    .status[data-state="error"] {
+      color: #ff6b6b;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="row">
-    <h1>Depot Notes – Quick Picker</h1>
-    <span class="tag">MVP v1</span>
-  </div>
-  <div class="row">
-    <button class="btn" id="modeBtn" title="Toggle detail mode">Mode: <strong id="modeLabel">Standard</strong></button>
-    <button class="btn" id="restoreBtn" title="Restore last session">Restore</button>
-    <button class="btn" id="gearBtn" title="Output settings">⚙️</button>
-  </div>
-</header>
+  <main>
+    <header>
+      <h1>System Transition Matrix</h1>
+      <p class="lead">Select the current and proposed system components to reveal the recommended mapping codes. Copy each note individually or combine everything into one clipboard string.</p>
+    </header>
 
-<div class="wrap grid">
-  <!-- LEFT: Selection flow -->
-  <section class="panel">
-    <div class="stepper" id="stepper"></div>
-    <div id="stepWrap"></div>
-  </section>
+    <div class="grid" id="sections"></div>
 
-  <!-- RIGHT: Live summary -->
-  <section class="panel">
-    <h2>Summary & Copy Boxes</h2>
-    <div class="muted small">Outputs update live. Use the ⚙️ panel to change delimiter, codes, arrows, and detail level.</div>
-    <div class="spacer"></div>
-
-    <div class="columns" id="copyBoxes"></div>
-    <div class="spacer"></div>
-    <div class="copybar">
-      <button class="btn" id="copyAllBtn">Copy All</button>
-      <button class="btn ghost" id="clearBtn">Clear Selections</button>
-      <span class="muted small">Semicolon line breaks; designed to paste straight into Depot.</span>
+    <div class="footer-actions">
+      <button id="copyAllBtn" disabled>Copy All Notes</button>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
     </div>
-  </section>
-</div>
+  </main>
 
-<!-- Drawer: Output settings -->
-<div class="drawer" id="drawer">
-  <div class="row" style="justify-content:space-between;">
-    <h3>Output & Behaviour</h3>
-    <button class="btn ghost" id="closeDrawer">Close</button>
-  </div>
-  <div class="kv">
-    <label class="thin switch"><input type="checkbox" id="optShowCodes" checked> Include codes (e.g., NE01)</label>
-    <label class="thin switch"><input type="checkbox" id="optArrow"> Prefix ↘️ on new lines</label>
-    <label class="thin switch"><input type="checkbox" id="optCompact"> Compact (remove extra spaces)</label>
-    <label class="thin switch"><input type="checkbox" id="optRemember" checked> Auto-save to device</label>
-  </div>
-  <div class="spacer"></div>
-  <div class="kv">
-    <label class="thin switch"><input type="radio" name="mode" value="Lite"> Lite</label>
-    <label class="thin switch"><input type="radio" name="mode" value="Standard" checked> Standard</label>
-    <label class="thin switch"><input type="radio" name="mode" value="Full"> Full</label>
-  </div>
-  <div class="spacer"></div>
-  <div class="thin">
-    <div class="row" style="justify-content:space-between;">
-      <div class="muted small">Delimiter</div>
-      <div class="row">
-        <button class="btn small" data-delim=";">;</button>
-        <button class="btn small" data-delim=" | ">|</button>
-        <button class="btn small" data-delim="\n">New line</button>
+  <template id="section-template">
+    <section>
+      <h2></h2>
+      <div class="controls">
+        <label>
+          <span class="label-current"></span>
+          <select class="current-select"></select>
+        </label>
+        <label>
+          <span class="label-proposed"></span>
+          <select class="proposed-select"></select>
+        </label>
       </div>
-    </div>
-    <div class="muted small">Current: <code id="delimLabel">;</code></div>
-  </div>
-</div>
-
-<script>
-/* ===========================
-   Data (extendable)
-   =========================== */
-
-// Minimal exemplar sets — extend with your full Options later.
-const OPTIONS = [
-  {
-    groupId: "needs",
-    label: "Customer Needs",
-    section: "Needs",
-    step: "Needs",
-    options: [
-      { code:"NE01", short:"Better water pressure", long:"Improve hot water pressure at outlets" },
-      { code:"NE02", short:"Faster hot water", long:"Reduce hot water wait time at key taps" },
-      { code:"NE03", short:"More usable space", long:"Free up space by optimising plant location" },
-      { code:"NE04", short:"Lower running costs", long:"Improve efficiency and lower bills" },
-      { code:"NE05", short:"Easier controls", long:"Simplify controls and usability" },
-      { code:"NE06", short:"Quieter operation", long:"Reduce system/boiler noise" },
-      { code:"NE07", short:"Future-ready", long:"Enable upgrades (smart, low-carbon ready)" }
-    ]
-  },
-  {
-    groupId: "wah",
-    label: "Working at Heights",
-    section: "Working at heights",
-    step: "Safety & Access",
-    options: [
-      { code:"WAH01", short:"Ladder access required", long:"Ladder access required" },
-      { code:"WAH02A", short:"Tower – standard", long:"Scaffold tower – standard" },
-      { code:"WAH02B", short:"Tower – bridging", long:"Scaffold tower – bridging" },
-      { code:"WAH02C", short:"Cantilever", long:"Cantilever scaffold required" },
-      { code:"WAH03", short:"Roof access permit", long:"Roof access – permit required" },
-      { code:"WAH04A", short:"Loft boarded", long:"Loft access – boarded" },
-      { code:"WAH04B", short:"Loft unboarded", long:"Loft access – unboarded" },
-      { code:"WAH05", short:"MEWP required", long:"MEWP required" },
-      { code:"WAH06", short:"Flat roof – make good", long:"Flat roof – specialist builder to make good" },
-      { code:"WAH50", short:"Ladder 1:4 angle", long:"Ladder 1:4 angle (≈75°) – ~250 mm out per metre rise; secure footing" },
-      { code:"WAH51", short:"Max ladder reach", long:"Max practical ladder reach ≈6 m; >2 storeys or >45°: escalate" }
-    ]
-  },
-
-  // 👉 Add the rest as you have them (system characteristics old/new, components that require assistance,
-  // restrictions, hazards, delivery, office, boiler & controls, flue, pipe) with the same shape:
-  // { groupId, label, section, step, options:[{code, short, long}] }
-];
-
-// Order & visibility per “mode”
-const MODE_STEPS = {
-  Lite: ["Needs", "Safety & Access"],
-  Standard: ["Needs", "Safety & Access"], // extend with more steps as you add groups
-  Full: ["Needs", "Safety & Access"]      // same: add the full list here later
-};
-
-// Map a groupId to a Depot copy-box section label (already provided per group in OPTIONS.section)
-// If you need to route certain codes to *different* sections, add explicit rules here.
-const ROUTING_RULES = {
-  // example: "NE07": "Office"
-};
-
-/* ===========================
-   State
-   =========================== */
-const state = {
-  picks: new Set(),  // stores "groupId|code"
-  notesFreeform: {}, // section -> array of strings
-  settings: {
-    showCodes: true,
-    arrow: false,
-    compact: false,
-    remember: true,
-    mode: "Standard",
-    delimiter: ";"
-  }
-};
-
-const el = s => document.querySelector(s);
-const els = s => [...document.querySelectorAll(s)];
-
-function save(){
-  if(!state.settings.remember) return;
-  localStorage.setItem("dnqp_state", JSON.stringify({
-    picks:[...state.picks],
-    notesFreeform: state.notesFreeform,
-    settings: state.settings
-  }));
-}
-function load(){
-  const raw = localStorage.getItem("dnqp_state");
-  if(!raw) return false;
-  try{
-    const obj = JSON.parse(raw);
-    state.picks = new Set(obj.picks||[]);
-    state.notesFreeform = obj.notesFreeform||{};
-    state.settings = Object.assign(state.settings, obj.settings||{});
-    return true;
-  }catch(e){ return false; }
-}
-
-/* ===========================
-   UI: Steps + Filters
-   =========================== */
-function getVisibleGroups(){
-  const wantedSteps = MODE_STEPS[state.settings.mode] || MODE_STEPS.Standard;
-  return OPTIONS.filter(g => wantedSteps.includes(g.step));
-}
-
-function renderStepper(){
-  const steps = [...new Set(getVisibleGroups().map(g=>g.step))];
-  const stepper = el("#stepper");
-  stepper.innerHTML = "";
-  steps.forEach((s,i)=>{
-    const b = document.createElement("button");
-    b.className = "step" + (i===0?" active":"");
-    b.textContent = s;
-    b.dataset.step = s;
-    b.onclick = ()=>{
-      els(".step").forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
-      renderStep(s);
-    };
-    stepper.appendChild(b);
-  });
-}
-
-function renderStep(stepName){
-  const wrap = el("#stepWrap");
-  const groups = getVisibleGroups().filter(g=>g.step===stepName);
-  wrap.innerHTML = "";
-
-  groups.forEach(group=>{
-    const sec = document.createElement("section");
-    sec.className = "panel";
-    sec.innerHTML = `
-      <h2>${group.label}</h2>
-      <div class="search">
-        <span class="muted small">Filter</span>
-        <input type="search" placeholder="Type to filter ${group.label.toLowerCase()}..." data-for="${group.groupId}" />
-        <button class="btn ghost small" data-clear="${group.groupId}">Clear</button>
+      <div class="result-box">
+        <textarea class="result" readonly placeholder="Select an option above"></textarea>
+        <button class="copy-btn" type="button" disabled>Copy</button>
       </div>
-      <div class="chips" id="chips_${group.groupId}"></div>
-      <div class="spacer"></div>
-      <div class="thin">
-        <div class="row" style="justify-content:space-between;">
-          <div class="muted small">Quick note to <strong>${group.section}</strong></div>
-          <button class="btn small" data-addnote="${group.section}">Add</button>
-        </div>
-        <input type="text" id="note_${group.section}" placeholder="Free text (kept local)" style="width:100%;padding:10px;background:#0f1318;border:1px solid var(--line);border-radius:8px;color:var(--ink)">
-      </div>
-    `;
-    wrap.appendChild(sec);
+    </section>
+  </template>
 
-    // render chips
-    renderChips(group.groupId);
-
-    // wiring
-    sec.querySelector(`input[data-for="${group.groupId}"]`).addEventListener("input", (e)=>{
-      renderChips(group.groupId, e.target.value.trim().toLowerCase());
-    });
-    sec.querySelector(`[data-clear="${group.groupId}"]`).onclick = ()=>{
-      state.picks = new Set([...state.picks].filter(key=>!key.startsWith(group.groupId+"|")));
-      renderChips(group.groupId);
-      renderCopyBoxes();
-      save();
-    };
-    sec.querySelector(`[data-addnote="${group.section}"]`).onclick = ()=>{
-      const v = sec.querySelector(`#note_${group.section}`).value.trim();
-      if(!v) return;
-      if(!state.notesFreeform[group.section]) state.notesFreeform[group.section]=[];
-      state.notesFreeform[group.section].push(v);
-      sec.querySelector(`#note_${group.section}`).value = "";
-      renderCopyBoxes();
-      save();
-    };
-  });
-}
-
-function renderChips(groupId, filter=""){
-  const group = OPTIONS.find(g=>g.groupId===groupId);
-  const host = el(`#chips_${groupId}`);
-  host.innerHTML = "";
-  group.options
-    .filter(o => (o.code+" "+o.short+" "+(o.long||"")).toLowerCase().includes(filter))
-    .forEach(opt=>{
-      const key = groupId+"|"+opt.code;
-      const p = document.createElement("button");
-      p.className = "pill"+(state.picks.has(key)?" active":"");
-      p.innerHTML = `<input type="checkbox" ${state.picks.has(key)?"checked":""} /> <strong>${opt.short}</strong><span class="muted small">${opt.code}</span>`;
-      p.onclick = ()=>{
-        if(state.picks.has(key)) state.picks.delete(key); else state.picks.add(key);
-        p.classList.toggle("active");
-        renderCopyBoxes();
-        save();
-      };
-      host.appendChild(p);
-    });
-}
-
-/* ===========================
-   Output builder
-   =========================== */
-function toSectionFor(code, defaultSection){
-  return ROUTING_RULES[code] || defaultSection;
-}
-
-function buildLinesForSection(sectionName){
-  // Collect from picks
-  const picks = [...state.picks].map(key=>{
-    const [groupId, code] = key.split("|");
-    const group = OPTIONS.find(g=>g.groupId===groupId);
-    const opt = group?.options.find(o=>o.code===code);
-    if(!group || !opt) return null;
-    return { section: toSectionFor(code, group.section), code, short: opt.short, long: opt.long };
-  }).filter(Boolean);
-
-  const selectedForSection = picks.filter(p=>p.section===sectionName);
-
-  // Preferred phrasing by mode
-  const useLong = (state.settings.mode === "Full");
-  const textBits = selectedForSection.map(p=>{
-    const label = (useLong && p.long) ? p.long : p.short;
-    const codeStr = state.settings.showCodes ? `${p.code} – ` : "";
-    return codeStr + label;
-  });
-
-  // Add freeform notes for that section
-  const free = state.notesFreeform[sectionName] || [];
-  textBits.push(...free);
-
-  // format line prefix and delimiter
-  const prefix = state.settings.arrow ? "↘️ " : "";
-  const delim = state.settings.delimiter === "\\n" ? "\n" : state.settings.delimiter;
-
-  let out = textBits.map(t => (prefix + (state.settings.compact ? t.replace(/\s+/g," ") : t))).join(delim + " ");
-  return out;
-}
-
-const OUTPUT_SECTIONS_ORDER = [
-  "Needs",
-  "Working at heights",
-  // 👉 Add the rest here, and they’ll appear as copy boxes immediately:
-  // "System characteristics – old",
-  // "System characteristics – new",
-  // "Components that require assistance",
-  // "Restrictions",
-  // "Hazards",
-  // "Delivery",
-  // "Office",
-  // "Boiler and controls",
-  // "Flue",
-  // "Pipe"
-];
-
-function renderCopyBoxes(){
-  const host = el("#copyBoxes");
-  host.innerHTML = "";
-  OUTPUT_SECTIONS_ORDER.forEach(sec=>{
-    const val = buildLinesForSection(sec);
-    const wrap = document.createElement("div");
-    wrap.innerHTML = `
-      <div class="copybar">
-        <strong>${sec}</strong>
-        <span class="muted small right">${(val && val.trim())? "Auto-built" : "Empty"}</span>
-      </div>
-      <textarea class="copy" data-sec="${sec}" spellcheck="false">${val||""}</textarea>
-      <div class="copybar">
-        <button class="btn small" data-copy="${sec}">Copy</button>
-        <button class="btn small" data-clearsec="${sec}">Clear section</button>
-        <span class="muted small">Editable. Changes won’t alter selections.</span>
-      </div>
-    `;
-    host.appendChild(wrap);
-  });
-
-  // wire buttons
-  els("[data-copy]").forEach(b=>{
-    b.onclick = ()=>{
-      const sec = b.getAttribute("data-copy");
-      const ta = document.querySelector(`textarea[data-sec="${sec}"]`);
-      ta.select(); document.execCommand("copy");
-      b.textContent = "Copied";
-      setTimeout(()=>b.textContent="Copy",800);
-    };
-  });
-  els("[data-clearsec]").forEach(b=>{
-    b.onclick = ()=>{
-      const sec = b.getAttribute("data-clearsec");
-      // clear freeform for this section and also delete selected options routed here
-      if(confirm(`Clear selections and notes for "${sec}"?`)){
-        // remove routed picks
-        for(const key of [...state.picks]){
-          const [groupId, code] = key.split("|");
-          const group = OPTIONS.find(g=>g.groupId===groupId);
-          if(!group) continue;
-          const section = toSectionFor(code, group.section);
-          if(section===sec) state.picks.delete(key);
-        }
-        // clear freeform
-        delete state.notesFreeform[sec];
-        renderStepper(); // refresh chips selection state
-        // keep active step the first
-        renderStep((MODE_STEPS[state.settings.mode]||[])[0]);
-        renderCopyBoxes();
-        save();
+  <script>
+    const sectionsConfig = [
+      {
+        id: "boiler",
+        title: "Boiler change",
+        mappingKey: "boiler_mappings",
+        currentLabel: "Current boiler",
+        proposedLabel: "Proposed boiler",
+        currentOptions: [
+          { label: "Regular", value: "regular" },
+          { label: "System", value: "system" },
+          { label: "Combi", value: "combi" },
+          { label: "Warm Air", value: "warm_air" },
+          { label: "None", value: "none" }
+        ],
+        proposedOptions: [
+          { label: "Regular", value: "regular" },
+          { label: "System", value: "system" },
+          { label: "Combi", value: "combi" }
+        ]
+      },
+      {
+        id: "flue",
+        title: "Flue change",
+        mappingKey: "flue_mappings",
+        currentLabel: "Current flue",
+        proposedLabel: "Proposed flue",
+        currentOptions: [
+          { label: "Balanced", value: "balanced" },
+          { label: "Horizontal", value: "horizontal" },
+          { label: "Direct Rear", value: "direct_rear" },
+          { label: "Vertical", value: "vertical" },
+          { label: "Open", value: "open" }
+        ],
+        proposedOptions: [
+          { label: "Fanned", value: "fanned" },
+          { label: "Vertical", value: "vertical" },
+          { label: "Plume Kit", value: "plume_kit" }
+        ]
+      },
+      {
+        id: "cylinder",
+        title: "Cylinder change",
+        mappingKey: "cylinder_mappings",
+        currentLabel: "Current cylinder",
+        proposedLabel: "Proposed cylinder",
+        currentOptions: [
+          { label: "Vented", value: "vented" },
+          { label: "Unvented", value: "unvented" },
+          { label: "Thermal Store", value: "thermal_store" },
+          { label: "None", value: "none" }
+        ],
+        proposedOptions: [
+          { label: "None", value: "none" },
+          { label: "Unvented", value: "unvented" },
+          { label: "Heatstore", value: "heatstore" }
+        ]
+      },
+      {
+        id: "condensate",
+        title: "Condensate waste",
+        mappingKey: "condensate_mappings",
+        currentLabel: "Current waste",
+        proposedLabel: "Proposed waste",
+        currentOptions: [
+          { label: "None", value: "none" },
+          { label: "Internal", value: "internal" },
+          { label: "External", value: "external" },
+          { label: "Shared", value: "shared" },
+          { label: "Pumped", value: "pumped" }
+        ],
+        proposedOptions: [
+          { label: "Internal", value: "internal" },
+          { label: "External", value: "external" },
+          { label: "Pumped", value: "pumped" },
+          { label: "Gravity", value: "gravity" }
+        ]
       }
-    };
-  });
+    ];
 
-  // manual edits shouldn’t overwrite picks; we allow user to tweak the textareas freely
-}
+    const sectionsContainer = document.getElementById("sections");
+    const sectionTemplate = document.getElementById("section-template");
+    const statusEl = document.getElementById("status");
+    const copyAllBtn = document.getElementById("copyAllBtn");
 
-/* ===========================
-   Controls
-   =========================== */
-function initControls(){
-  // Mode
-  el("#modeBtn").onclick = ()=>{
-    const next = state.settings.mode==="Lite"?"Standard":state.settings.mode==="Standard"?"Full":"Lite";
-    state.settings.mode = next;
-    el("#modeLabel").textContent = next;
-    // Update drawer radios
-    els('input[name="mode"]').forEach(r=>r.checked = (r.value===next));
-    renderStepper();
-    const first = (MODE_STEPS[next]||[])[0];
-    renderStep(first);
-    renderCopyBoxes();
-    save();
-  };
+    let mappings = null;
+    const sectionState = new Map();
 
-  // Restore
-  el("#restoreBtn").onclick = ()=>{
-    const ok = load();
-    if(ok){
-      el("#modeLabel").textContent = state.settings.mode;
-      els('input[name="mode"]').forEach(r=>r.checked = (r.value===state.settings.mode));
-      renderStepper();
-      const first = (MODE_STEPS[state.settings.mode]||[])[0];
-      renderStep(first);
-      renderCopyBoxes();
-      alert("Restored last session.");
-    }else{
-      alert("No saved session found.");
+    function setStatus(message = "", state = "") {
+      statusEl.textContent = message;
+      if (state) {
+        statusEl.dataset.state = state;
+      } else {
+        statusEl.removeAttribute("data-state");
+      }
     }
-  };
 
-  // Drawer
-  const drawer = el("#drawer");
-  el("#gearBtn").onclick = ()=> drawer.classList.add("open");
-  el("#closeDrawer").onclick = ()=> drawer.classList.remove("open");
+    function resizeToContent(textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
 
-  // Drawer toggles
-  el("#optShowCodes").onchange = e=>{ state.settings.showCodes = e.target.checked; renderCopyBoxes(); save(); };
-  el("#optArrow").onchange     = e=>{ state.settings.arrow = e.target.checked;     renderCopyBoxes(); save(); };
-  el("#optCompact").onchange   = e=>{ state.settings.compact = e.target.checked;   renderCopyBoxes(); save(); };
-  el("#optRemember").onchange  = e=>{ state.settings.remember = e.target.checked;  save(); };
+    function createOptionElement({ label, value }) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      return option;
+    }
 
-  els('input[name="mode"]').forEach(r=>{
-    r.onchange = ()=>{
-      if(r.checked){
-        state.settings.mode = r.value;
-        el("#modeLabel").textContent = r.value;
-        renderStepper();
-        const first = (MODE_STEPS[state.settings.mode]||[])[0];
-        renderStep(first);
-        renderCopyBoxes();
-        save();
+    function formatKey(current, proposed) {
+      return `${current}_to_${proposed}`;
+    }
+
+    function updateCopyAllState() {
+      const hasValues = Array.from(sectionState.values()).some((value) => value && !value.error && value.text);
+      copyAllBtn.disabled = !hasValues;
+    }
+
+    async function copyText(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (error) {
+        console.error("Clipboard copy failed", error);
+        return false;
       }
-    };
-  });
+    }
 
-  els('button[data-delim]').forEach(b=>{
-    b.onclick = ()=>{
-      state.settings.delimiter = b.getAttribute("data-delim");
-      el("#delimLabel").textContent = state.settings.delimiter === "\\n" ? "New line" : state.settings.delimiter;
-      renderCopyBoxes(); save();
-    };
-  });
+    function updateSection(sectionId) {
+      const state = sectionState.get(sectionId);
+      const { resultEl, copyBtn, currentSelect, proposedSelect } = state;
 
-  // Copy All
-  el("#copyAllBtn").onclick = ()=>{
-    // Concatenate in OUTPUT_SECTIONS_ORDER
-    const parts = OUTPUT_SECTIONS_ORDER.map(sec=>{
-      const ta = document.querySelector(`textarea[data-sec="${sec}"]`);
-      const val = (ta?.value||"").trim();
-      return val ? `# ${sec}\n${val}` : `# ${sec}\n`;
-    }).join("\n\n");
-    const tmp = document.createElement("textarea");
-    tmp.value = parts;
-    document.body.appendChild(tmp);
-    tmp.select(); document.execCommand("copy"); tmp.remove();
-    el("#copyAllBtn").textContent = "Copied All";
-    setTimeout(()=>el("#copyAllBtn").textContent = "Copy All",900);
-  };
+      if (!mappings) {
+        resultEl.value = "Loading mappings…";
+        resultEl.setAttribute("aria-busy", "true");
+        copyBtn.disabled = true;
+        state.text = "";
+        state.error = true;
+        updateCopyAllState();
+        return;
+      }
 
-  // Clear selections
-  el("#clearBtn").onclick = ()=>{
-    if(!confirm("Clear ALL selections and notes?")) return;
-    state.picks.clear();
-    state.notesFreeform = {};
-    renderStepper();
-    const first = (MODE_STEPS[state.settings.mode]||[])[0];
-    renderStep(first);
-    renderCopyBoxes();
-    save();
-  };
-}
+      const current = currentSelect.value;
+      const proposed = proposedSelect.value;
 
-/* ===========================
-   Boot
-   =========================== */
-(function boot(){
-  // defaults
-  el("#delimLabel").textContent = state.settings.delimiter;
-  load(); // restore if present
-  // set UI from state
-  el("#modeLabel").textContent = state.settings.mode;
-  el("#optShowCodes").checked = state.settings.showCodes;
-  el("#optArrow").checked = state.settings.arrow;
-  el("#optCompact").checked = state.settings.compact;
-  el("#optRemember").checked = state.settings.remember;
-  els('input[name="mode"]').forEach(r=>r.checked = (r.value===state.settings.mode));
+      const key = formatKey(current, proposed);
+      const mappingGroup = mappings[state.mappingKey];
+      const result = mappingGroup ? mappingGroup[key] : undefined;
 
-  renderStepper();
-  const first = (MODE_STEPS[state.settings.mode]||[])[0];
-  renderStep(first);
-  renderCopyBoxes();
-  initControls();
-})();
-</script>
+      if (result) {
+        resultEl.value = result;
+        resultEl.removeAttribute("aria-busy");
+        copyBtn.disabled = false;
+        state.text = result;
+        state.error = false;
+      } else {
+        const pretty = `${currentSelect.options[currentSelect.selectedIndex].text} → ${proposedSelect.options[proposedSelect.selectedIndex].text}`;
+        resultEl.value = `No mapping available for ${pretty}`;
+        resultEl.setAttribute("aria-busy", "true");
+        copyBtn.disabled = true;
+        state.text = "";
+        state.error = true;
+      }
+
+      resizeToContent(resultEl);
+      updateCopyAllState();
+    }
+
+    function initSection(config) {
+      const { id, title, mappingKey, currentLabel, proposedLabel, currentOptions, proposedOptions } = config;
+      const fragment = sectionTemplate.content.cloneNode(true);
+      const h2 = fragment.querySelector("h2");
+      const currentLabelSpan = fragment.querySelector(".label-current");
+      const proposedLabelSpan = fragment.querySelector(".label-proposed");
+      const currentSelect = fragment.querySelector(".current-select");
+      const proposedSelect = fragment.querySelector(".proposed-select");
+      const resultEl = fragment.querySelector(".result");
+      const copyBtn = fragment.querySelector(".copy-btn");
+
+      h2.textContent = title;
+      currentLabelSpan.textContent = currentLabel;
+      proposedLabelSpan.textContent = proposedLabel;
+
+      currentOptions.forEach((option) => currentSelect.appendChild(createOptionElement(option)));
+      proposedOptions.forEach((option) => proposedSelect.appendChild(createOptionElement(option)));
+
+      const initialState = {
+        mappingKey,
+        resultEl,
+        copyBtn,
+        currentSelect,
+        proposedSelect,
+        text: "",
+        error: true
+      };
+
+      sectionState.set(id, initialState);
+
+      resizeToContent(resultEl);
+
+      currentSelect.addEventListener("change", () => updateSection(id));
+      proposedSelect.addEventListener("change", () => updateSection(id));
+
+      copyBtn.addEventListener("click", async () => {
+        if (!initialState.text) return;
+        const ok = await copyText(initialState.text);
+        if (ok) {
+          setStatus(`${title} copied to clipboard`, "success");
+          window.setTimeout(() => setStatus(""), 2000);
+        } else {
+          setStatus("Clipboard copy blocked. Try copying manually.", "error");
+        }
+      });
+
+      sectionsContainer.appendChild(fragment);
+    }
+
+    async function loadMappings() {
+      try {
+        const response = await fetch("data/mappings.json", { cache: "no-store" });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        mappings = await response.json();
+        sectionState.forEach((_, sectionId) => updateSection(sectionId));
+        setStatus("Mappings loaded", "success");
+        window.setTimeout(() => setStatus(""), 2000);
+      } catch (error) {
+        console.error("Failed to load mappings", error);
+        setStatus("Could not load mappings.json. Check the /data folder.", "error");
+      }
+    }
+
+    copyAllBtn.addEventListener("click", async () => {
+      const values = Array.from(sectionState.values())
+        .map((state) => state.text)
+        .filter(Boolean);
+
+      if (!values.length) return;
+
+      const combined = values.join("\n");
+      const ok = await copyText(combined);
+      if (ok) {
+        setStatus("All notes copied", "success");
+        window.setTimeout(() => setStatus(""), 2000);
+      } else {
+        setStatus("Clipboard copy blocked. Try copying manually.", "error");
+      }
+    });
+
+    sectionsConfig.forEach(initSection);
+    loadMappings();
+  </script>
 </body>
 </html>
-<script>
-/* ===========================
-   Dynamic Options loader for Options.txt / Options.text
-   - Supports lines like:
-     [Needs]
-     NE01 | Need | Better water pressure
-   - Ignores blanks and lines starting with '#'
-   =========================== */
-
-// Preferred display order of Depot sections (others will append at end)
-const PREFERRED_ORDER = [
-  "Needs",
-  "Working at heights",
-  "System characteristics – old",
-  "System characteristics – new",
-  "Components that require assistance",
-  "Restrictions",
-  "Hazards",
-  "Delivery",
-  "Office",
-  "Boiler and controls",
-  "Flue",
-  "Pipe"
-];
-
-// Map group headers (from [ … ]) to Depot section + step label
-function metaForGroup(headerRaw){
-  const h = headerRaw.trim();
-  const hl = h.toLowerCase();
-
-  // Explicit matches first
-  if (hl === "needs") return { section:"Needs", step:"Needs" };
-  if (hl === "working at heights" || hl === "wah") return { section:"Working at heights", step:"Safety & Access" };
-
-  // System characteristics heuristics
-  if (hl.includes("system") && hl.includes("characteristic")) {
-    if (/(old|existing)/i.test(h)) return { section:"System characteristics – old", step:"System – Old" };
-    if (/(new|proposed)/i.test(h)) return { section:"System characteristics – new", step:"System – New" };
-    return { section:"System characteristics – old", step:"System – Old" }; // sensible default
-  }
-
-  // Common groups
-  if (hl.includes("hazard")) return { section:"Hazards", step:"Safety & Access" };
-  if (hl.includes("delivery")) return { section:"Delivery", step:"Logistics" };
-  if (hl.includes("office")) return { section:"Office", step:"Admin" };
-  if (hl.includes("boiler") && hl.includes("control")) return { section:"Boiler and controls", step:"Appliance" };
-  if (hl === "flue" || hl.includes("flue")) return { section:"Flue", step:"Appliance" };
-  if (hl === "pipe" || hl.includes("pipe")) return { section:"Pipe", step:"Appliance" };
-  if (hl.includes("component") && hl.includes("assistance")) return { section:"Components that require assistance", step:"Resources" };
-  if (hl.includes("restriction")) return { section:"Restrictions", step:"Site" };
-
-  // Fallback: use header as section and put in Misc step
-  return { section: h, step:"Misc" };
-}
-
-function parseOptionsTxt(text){
-  const groups = [];
-  let current = null;
-
-  const pushGroup = () => { if(current && current.options.length) groups.push(current); };
-
-  const lines = text.split(/\r?\n/);
-  for (let raw of lines){
-    const line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-
-    // Header like [Needs]
-    const m = line.match(/^\[(.+?)\]$/);
-    if (m){
-      // close previous
-      pushGroup();
-      const header = m[1].trim();
-      const meta = metaForGroup(header);
-      current = {
-        groupId: header.toLowerCase().replace(/\s+/g,'-'),
-        header,
-        label: header,       // UI
-        section: meta.section, // Depot section
-        step: meta.step,       // Step bucket
-        options: []
-      };
-      continue;
-    }
-
-    // Expect "CODE | Category | Label" (allow extra pipes; we take first and last fields)
-    if (!current) continue; // ignore stray lines before first header
-    const parts = line.split("|").map(s=>s.trim());
-    if (parts.length >= 2){
-      const code = parts[0];
-      const label = parts[parts.length - 1]; // last field = user-facing label
-      if (code && label){
-        current.options.push({
-          code,
-          short: label,
-          long: label // we can later extend with richer text if needed
-        });
-      }
-    }
-  }
-  pushGroup();
-  return groups;
-}
-
-// Try fetching Options.txt then Options.text
-async function fetchOptionsFile(){
-  const tries = ["Options.txt", "Options.text"]; // case-sensitive on Pages
-  for (const path of tries){
-    try{
-      const res = await fetch(path, { cache: "no-store" });
-      if (res.ok){
-        const txt = await res.text();
-        if (txt && txt.trim().length) return { path, text: txt };
-      }
-    }catch(e){ /* ignore and try next */ }
-  }
-  return null;
-}
-
-/* ===========================
-   App State & Utilities (same API as before)
-   =========================== */
-let OPTIONS = []; // now dynamic
-const ROUTING_RULES = {}; // keep free for future overrides
-
-const state = {
-  picks: new Set(),
-  notesFreeform: {},
-  settings: {
-    showCodes: true,
-    arrow: false,
-    compact: false,
-    remember: true,
-    mode: "Standard",
-    delimiter: ";"
-  }
-};
-
-const el = s => document.querySelector(s);
-const els = s => [...document.querySelectorAll(s)];
-
-function save(){
-  if(!state.settings.remember) return;
-  localStorage.setItem("dnqp_state", JSON.stringify({
-    picks:[...state.picks],
-    notesFreeform: state.notesFreeform,
-    settings: state.settings
-  }));
-}
-function load(){
-  const raw = localStorage.getItem("dnqp_state");
-  if(!raw) return false;
-  try{
-    const obj = JSON.parse(raw);
-    state.picks = new Set(obj.picks||[]);
-    state.notesFreeform = obj.notesFreeform||{};
-    state.settings = Object.assign(state.settings, obj.settings||{});
-    return true;
-  }catch(e){ return false; }
-}
-
-/* ===========================
-   Dynamic steps & sections from loaded OPTIONS
-   =========================== */
-function unique(arr){ return [...new Set(arr)]; }
-
-function computedStepOrder(){
-  // Derive from OPTIONS and sort by a sensible default order
-  const steps = unique(OPTIONS.map(g=>g.step));
-  const preferred = ["Needs","Safety & Access","System – Old","System – New","Appliance","Site","Resources","Logistics","Admin","Misc"];
-  const order = [...preferred, ...steps.filter(s=>!preferred.includes(s))];
-  return order.filter(s=>steps.includes(s));
-}
-
-// Mode → which steps to show
-function MODE_STEPS(mode){
-  const full = computedStepOrder();
-  if (mode === "Lite"){
-    // Show the first 2–3 key steps if present
-    return full.filter(s => ["Needs","Safety & Access","Appliance"].includes(s)).slice(0,3);
-  }
-  if (mode === "Full") return full;
-  // Standard
-  const keep = new Set(["Needs","Safety & Access","System – Old","System – New","Appliance"]);
-  const std = full.filter(s => keep.has(s));
-  return std.length ? std : full.slice(0,5);
-}
-
-// Sections order (copy boxes)
-function computedSectionsOrder(){
-  const discovered = unique(OPTIONS.map(g=>g.section));
-  const ordered = [...PREFERRED_ORDER, ...discovered.filter(s=>!PREFERRED_ORDER.includes(s))];
-  return ordered;
-}
-
-/* ===========================
-   UI (same components, now data-driven)
-   =========================== */
-function getVisibleGroups(){
-  const wantedSteps = MODE_STEPS(state.settings.mode);
-  return OPTIONS.filter(g => wantedSteps.includes(g.step));
-}
-
-function renderStepper(){
-  const steps = unique(getVisibleGroups().map(g=>g.step));
-  const stepper = el("#stepper");
-  stepper.innerHTML = "";
-  steps.forEach((s,i)=>{
-    const b = document.createElement("button");
-    b.className = "step" + (i===0?" active":"");
-    b.textContent = s;
-    b.dataset.step = s;
-    b.onclick = ()=>{
-      els(".step").forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
-      renderStep(s);
-    };
-    stepper.appendChild(b);
-  });
-}
-
-function renderStep(stepName){
-  const wrap = el("#stepWrap");
-  const groups = getVisibleGroups().filter(g=>g.step===stepName);
-  wrap.innerHTML = "";
-
-  if (!groups.length){
-    wrap.innerHTML = `<div class="muted small">No groups for this step.</div>`;
-    return;
-  }
-
-  groups.forEach(group=>{
-    const sec = document.createElement("section");
-    sec.className = "panel";
-    sec.innerHTML = `
-      <h2>${group.label}</h2>
-      <div class="search">
-        <span class="muted small">Filter</span>
-        <input type="search" placeholder="Type to filter ${group.label.toLowerCase()}..." data-for="${group.groupId}" />
-        <button class="btn ghost small" data-clear="${group.groupId}">Clear</button>
-      </div>
-      <div class="chips" id="chips_${group.groupId}"></div>
-      <div class="spacer"></div>
-      <div class="thin">
-        <div class="row" style="justify-content:space-between;">
-          <div class="muted small">Quick note to <strong>${group.section}</strong></div>
-          <button class="btn small" data-addnote="${group.section}">Add</button>
-        </div>
-        <input type="text" id="note_${group.section}" placeholder="Free text (kept local)" style="width:100%;padding:10px;background:#0f1318;border:1px solid var(--line);border-radius:8px;color:var(--ink)">
-      </div>
-    `;
-    wrap.appendChild(sec);
-
-    renderChips(group.groupId);
-
-    sec.querySelector(`input[data-for="${group.groupId}"]`).addEventListener("input", (e)=>{
-      renderChips(group.groupId, e.target.value.trim().toLowerCase());
-    });
-    sec.querySelector(`[data-clear="${group.groupId}"]`).onclick = ()=>{
-      state.picks = new Set([...state.picks].filter(key=>!key.startsWith(group.groupId+"|")));
-      renderChips(group.groupId);
-      renderCopyBoxes();
-      save();
-    };
-    sec.querySelector(`[data-addnote="${group.section}"]`).onclick = ()=>{
-      const v = sec.querySelector(`#note_${group.section}`).value.trim();
-      if(!v) return;
-      if(!state.notesFreeform[group.section]) state.notesFreeform[group.section]=[];
-      state.notesFreeform[group.section].push(v);
-      sec.querySelector(`#note_${group.section}`).value = "";
-      renderCopyBoxes();
-      save();
-    };
-  });
-}
-
-function renderChips(groupId, filter=""){
-  const group = OPTIONS.find(g=>g.groupId===groupId);
-  const host = el(`#chips_${groupId}`);
-  host.innerHTML = "";
-  (group?.options||[])
-    .filter(o => (o.code+" "+o.short+" "+(o.long||"")).toLowerCase().includes(filter))
-    .forEach(opt=>{
-      const key = groupId+"|"+opt.code;
-      const p = document.createElement("button");
-      p.className = "pill"+(state.picks.has(key)?" active":"");
-      p.innerHTML = `<input type="checkbox" ${state.picks.has(key)?"checked":""} /> <strong>${opt.short}</strong><span class="muted small">${opt.code}</span>`;
-      p.onclick = ()=>{
-        if(state.picks.has(key)) state.picks.delete(key); else state.picks.add(key);
-        p.classList.toggle("active");
-        renderCopyBoxes();
-        save();
-      };
-      host.appendChild(p);
-    });
-}
-
-function toSectionFor(code, defaultSection){
-  return ROUTING_RULES[code] || defaultSection;
-}
-
-function buildLinesForSection(sectionName){
-  const picks = [...state.picks].map(key=>{
-    const [groupId, code] = key.split("|");
-    const group = OPTIONS.find(g=>g.groupId===groupId);
-    const opt = group?.options.find(o=>o.code===code);
-    if(!group || !opt) return null;
-    return { section: toSectionFor(code, group.section), code, short: opt.short, long: opt.long };
-  }).filter(Boolean);
-
-  const selectedForSection = picks.filter(p=>p.section===sectionName);
-
-  const useLong = (state.settings.mode === "Full");
-  const textBits = selectedForSection.map(p=>{
-    const label = (useLong && p.long) ? p.long : p.short;
-    const codeStr = state.settings.showCodes ? `${p.code} – ` : "";
-    return codeStr + label;
-  });
-
-  const free = state.notesFreeform[sectionName] || [];
-  textBits.push(...free);
-
-  const prefix = state.settings.arrow ? "↘️ " : "";
-  const delim = state.settings.delimiter === "\\n" ? "\n" : state.settings.delimiter;
-
-  let out = textBits.map(t => (prefix + (state.settings.compact ? t.replace(/\s+/g," ") : t))).join(delim + " ");
-  return out;
-}
-
-function renderCopyBoxes(){
-  const host = el("#copyBoxes");
-  host.innerHTML = "";
-
-  const sections = computedSectionsOrder();
-  if (!sections.length){
-    host.innerHTML = `
-      <div class="thin">
-        <strong>No options loaded.</strong>
-        <div class="muted small">Add <code>Options.txt</code> to the repo root using your <code>[Group]</code> + <code>CODE | Category | Label</code> format, then refresh.</div>
-      </div>`;
-    return;
-  }
-
-  sections.forEach(sec=>{
-    const val = buildLinesForSection(sec) || "";
-    const wrap = document.createElement("div");
-    wrap.innerHTML = `
-      <div class="copybar">
-        <strong>${sec}</strong>
-        <span class="muted small right">${(val && val.trim())? "Auto-built" : "Empty"}</span>
-      </div>
-      <textarea class="copy" data-sec="${sec}" spellcheck="false">${val}</textarea>
-      <div class="copybar">
-        <button class="btn small" data-copy="${sec}">Copy</button>
-        <button class="btn small" data-clearsec="${sec}">Clear section</button>
-        <span class="muted small">Editable. Changes won’t alter selections.</span>
-      </div>
-    `;
-    host.appendChild(wrap);
-  });
-
-  els("[data-copy]").forEach(b=>{
-    b.onclick = ()=>{
-      const sec = b.getAttribute("data-copy");
-      const ta = document.querySelector(`textarea[data-sec="${sec}"]`);
-      ta.select(); document.execCommand("copy");
-      b.textContent = "Copied";
-      setTimeout(()=>b.textContent="Copy",800);
-    };
-  });
-  els("[data-clearsec]").forEach(b=>{
-    b.onclick = ()=>{
-      const sec = b.getAttribute("data-clearsec");
-      if(confirm(`Clear selections and notes for "${sec}"?`)){
-        for(const key of [...state.picks]){
-          const [groupId, code] = key.split("|");
-          const group = OPTIONS.find(g=>g.groupId===groupId);
-          if(!group) continue;
-          const section = toSectionFor(code, group.section);
-          if(section===sec) state.picks.delete(key);
-        }
-        delete state.notesFreeform[sec];
-        renderStepper();
-        const first = (MODE_STEPS(state.settings.mode)||[])[0];
-        renderStep(first);
-        renderCopyBoxes();
-        save();
-      }
-    };
-  });
-}
-
-/* ===========================
-   Controls (unchanged)
-   =========================== */
-function initControls(){
-  el("#modeBtn").onclick = ()=>{
-    const next = state.settings.mode==="Lite"?"Standard":state.settings.mode==="Standard"?"Full":"Lite";
-    state.settings.mode = next;
-    el("#modeLabel").textContent = next;
-    renderStepper();
-    const first = (MODE_STEPS(next)||[])[0];
-    renderStep(first);
-    renderCopyBoxes();
-    save();
-  };
-
-  el("#restoreBtn").onclick = ()=>{
-    const ok = load();
-    if(ok){
-      el("#modeLabel").textContent = state.settings.mode;
-      renderStepper();
-      const first = (MODE_STEPS(state.settings.mode)||[])[0];
-      renderStep(first);
-      renderCopyBoxes();
-      alert("Restored last session.");
-    }else{
-      alert("No saved session found.");
-    }
-  };
-
-  const drawer = el("#drawer");
-  el("#gearBtn").onclick = ()=> drawer.classList.add("open");
-  el("#closeDrawer").onclick = ()=> drawer.classList.remove("open");
-
-  el("#optShowCodes").onchange = e=>{ state.settings.showCodes = e.target.checked; renderCopyBoxes(); save(); };
-  el("#optArrow").onchange     = e=>{ state.settings.arrow = e.target.checked;     renderCopyBoxes(); save(); };
-  el("#optCompact").onchange   = e=>{ state.settings.compact = e.target.checked;   renderCopyBoxes(); save(); };
-  el("#optRemember").onchange  = e=>{ state.settings.remember = e.target.checked;  save(); };
-
-  els('input[name="mode"]').forEach(r=>{
-    r.onchange = ()=>{
-      if(r.checked){
-        state.settings.mode = r.value;
-        el("#modeLabel").textContent = r.value;
-        renderStepper();
-        const first = (MODE_STEPS(state.settings.mode)||[])[0];
-        renderStep(first);
-        renderCopyBoxes();
-        save();
-      }
-    };
-  });
-
-  els('button[data-delim]').forEach(b=>{
-    b.onclick = ()=>{
-      state.settings.delimiter = b.getAttribute("data-delim");
-      el("#delimLabel").textContent = state.settings.delimiter === "\\n" ? "New line" : state.settings.delimiter;
-      renderCopyBoxes(); save();
-    };
-  });
-
-  el("#copyAllBtn").onclick = ()=>{
-    const sections = computedSectionsOrder();
-    const parts = sections.map(sec=>{
-      const ta = document.querySelector(`textarea[data-sec="${sec}"]`);
-      const val = (ta?.value||"").trim();
-      return val ? `# ${sec}\n${val}` : `# ${sec}\n`;
-    }).join("\n\n");
-    const tmp = document.createElement("textarea");
-    tmp.value = parts;
-    document.body.appendChild(tmp);
-    tmp.select(); document.execCommand("copy"); tmp.remove();
-    el("#copyAllBtn").textContent = "Copied All";
-    setTimeout(()=>el("#copyAllBtn").textContent = "Copy All",900);
-  };
-
-  el("#clearBtn").onclick = ()=>{
-    if(!confirm("Clear ALL selections and notes?")) return;
-    state.picks.clear();
-    state.notesFreeform = {};
-    renderStepper();
-    const first = (MODE_STEPS(state.settings.mode)||[])[0];
-    renderStep(first);
-    renderCopyBoxes();
-    save();
-  };
-}
-
-/* ===========================
-   Boot: load Options file then render
-   =========================== */
-(async function boot(){
-  // Initial UI state
-  el("#delimLabel").textContent = state.settings.delimiter;
-  load();
-  el("#modeLabel").textContent = state.settings.mode;
-  el("#optShowCodes").checked = state.settings.showCodes;
-  el("#optArrow").checked = state.settings.arrow;
-  el("#optCompact").checked = state.settings.compact;
-  el("#optRemember").checked = state.settings.remember;
-  els('input[name="mode"]').forEach(r=>r.checked = (r.value===state.settings.mode));
-
-  // Try to fetch Options file
-  const found = await fetchOptionsFile();
-  if (!found){
-    // Show an inline notice and keep the UI alive
-    OPTIONS = [];
-    el("#stepper").innerHTML = "";
-    el("#stepWrap").innerHTML = `
-      <section class="panel">
-        <h2>Options not found</h2>
-        <div class="thin">
-          <div class="muted small">
-            Place <code>Options.txt</code> at the repo root.<br>
-            Example format:<br><br>
-            <pre>[Needs]
-NE01 | Need | Better water pressure
-NE02 | Need | Faster hot water delivery</pre>
-          </div>
-        </div>
-      </section>`;
-    renderCopyBoxes();
-    initControls();
-    return;
-  }
-
-  const parsed = parseOptionsTxt(found.text);
-  OPTIONS = parsed;
-
-  // Render
-  renderStepper();
-  const first = (MODE_STEPS(state.settings.mode)||[])[0] || (computedStepOrder()[0]||"");
-  if (first) renderStep(first); else el("#stepWrap").innerHTML = `<div class="muted small">No steps.</div>`;
-  renderCopyBoxes();
-  initControls();
-})();
-</script>
