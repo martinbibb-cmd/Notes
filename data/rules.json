@@ -1,0 +1,45 @@
+{
+  "boiler_transitions": [
+    { "when": { "from": "regular", "to": "regular" }, "add": ["keep_open_vent"] },
+    { "when": { "from": "regular", "to": "system"  }, "add": ["convert_to_sealed","remove_fe_tanks"] },
+    { "when": { "from": "regular", "to": "combi"   }, "add": ["convert_to_sealed","remove_fe_tanks","dhw_now_mains","remove_shower_pumps","no_replacement_cyl"] },
+
+    { "when": { "from": "system",  "to": "system"  }, "add": [] },
+    { "when": { "from": "system",  "to": "regular" }, "add": ["keep_open_vent"] },
+    { "when": { "from": "system",  "to": "combi"   }, "add": ["dhw_now_mains","remove_shower_pumps","no_replacement_cyl"] },
+
+    { "when": { "from": "combi",   "to": "combi"   }, "add": [] },
+    { "when": { "from": "combi",   "to": "system"  }, "add": [] },
+    { "when": { "from": "combi",   "to": "regular" }, "add": ["keep_open_vent"] }
+  ],
+
+  "cylinder_transitions": [
+    { "when": { "from": "vented",   "to": "vented"   }, "add": ["retain_vented_cyl"] },
+    { "when": { "from": "vented",   "to": "unvented" }, "add": ["remove_vented_cyl","g3_req","install_unvented"] },
+    { "when": { "from": "vented",   "to": "none"     }, "add": ["remove_vented_cyl","no_replacement_cyl"] },
+
+    { "when": { "from": "unvented", "to": "unvented" }, "add": ["retain_unvented"] },
+    { "when": { "from": "unvented", "to": "vented"   }, "add": ["keep_open_vent"] },
+    { "when": { "from": "unvented", "to": "none"     }, "add": ["no_replacement_cyl"] },
+
+    { "when": { "from": "none",     "to": "vented"   }, "add": ["keep_open_vent"] },
+    { "when": { "from": "none",     "to": "unvented" }, "add": ["g3_req","install_unvented"] },
+    { "when": { "from": "none",     "to": "none"     }, "add": [] }
+  ],
+
+  "flue_transitions": [
+    { "when": { "from": "balanced",   "to": "fanned_horizontal" }, "add": ["fanned_horizontal","terminal_clearances"] },
+    { "when": { "from": "open",       "to": "fanned_horizontal" }, "add": ["fanned_horizontal","terminal_clearances"] },
+    { "when": { "from": "horizontal", "to": "fanned_horizontal" }, "add": ["fanned_horizontal","terminal_clearances"] },
+    { "when": { "from": "any",        "to": "fanned_vertical"   }, "add": ["fanned_vertical","terminal_clearances"] }
+  ],
+
+  "flue_overrides": [
+    { "flag": "plume_required",     "when_to": ["fanned_horizontal","fanned_vertical"], "add": ["plume_kit"] },
+    { "flag": "plume_not_required", "when_to": ["fanned_horizontal","fanned_vertical"], "add": ["no_plume_needed"] }
+  ],
+
+  "context_flags": [
+    { "flag": "shower_pump_present", "on_boiler_to": ["combi","unvented"], "add": ["remove_shower_pumps"] }
+  ]
+}

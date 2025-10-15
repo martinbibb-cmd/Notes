@@ -4,17 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>System Transition Matrix</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       color-scheme: light dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
       --bg: #0b0d10;
-      --panel: #141920;
+      --panel: rgba(20, 25, 32, 0.92);
+      --border: rgba(255, 255, 255, 0.08);
       --ink: #f2f5f9;
       --muted: #9fb0c2;
       --accent: #4aa3ff;
-      --line: rgba(255, 255, 255, 0.08);
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -32,7 +35,7 @@
     }
 
     main {
-      width: min(1100px, 100%);
+      width: min(960px, 100%);
       display: grid;
       gap: 24px;
     }
@@ -41,7 +44,7 @@
       text-align: center;
       padding: 24px;
       border-radius: 20px;
-      background: rgba(20, 25, 32, 0.85);
+      background: rgba(20, 25, 32, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.04);
       box-shadow: var(--shadow);
     }
@@ -59,31 +62,25 @@
       line-height: 1.6;
     }
 
+    section {
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 20px;
+    }
+
     .grid {
       display: grid;
       gap: 20px;
     }
 
-    @media (min-width: 960px) {
+    @media (min-width: 800px) {
       .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-    }
-
-    section {
-      background: rgba(20, 25, 32, 0.92);
-      border-radius: 18px;
-      padding: 24px;
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      display: grid;
-      gap: 16px;
-    }
-
-    section h2 {
-      margin: 0;
-      font-size: 1.35rem;
-      letter-spacing: 0.2px;
     }
 
     label {
@@ -93,117 +90,54 @@
       color: var(--muted);
     }
 
-    select {
-      appearance: none;
-      background: rgba(9, 12, 16, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    select,
+    textarea {
+      background: rgba(9, 12, 16, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 12px;
       font: inherit;
       color: var(--ink);
-      transition: border 0.2s ease, box-shadow 0.2s ease;
     }
 
-    select:focus {
+    select:focus,
+    textarea:focus {
       outline: none;
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(74, 163, 255, 0.25);
     }
 
-    .controls {
-      display: grid;
-      gap: 12px;
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-weight: 600;
+      line-height: 1.4;
     }
 
-    @media (min-width: 640px) {
-      .controls {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    .result-box {
-      background: rgba(9, 12, 16, 0.8);
-      border-radius: 14px;
-      border: 1px dashed rgba(255, 255, 255, 0.16);
+    .flags {
       display: flex;
-      gap: 12px;
-      padding: 14px;
-      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
     }
 
-    .result {
-      flex: 1;
-      min-height: 48px;
-      border: none;
-      background: transparent;
-      color: inherit;
-      font: 600 1rem/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      resize: none;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    .result[aria-busy="true"]::placeholder {
-      color: var(--muted);
-    }
-
-    button.copy-btn,
-    button#copyAllBtn {
-      background: linear-gradient(135deg, rgba(74, 163, 255, 0.85), rgba(74, 163, 255, 0.6));
-      border: none;
-      color: #06111f;
-      font: 600 0.95rem/1 "Inter", sans-serif;
-      padding: 12px 18px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.15s ease, filter 0.15s ease;
+    .flag {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-    }
-
-    button.copy-btn:active,
-    button#copyAllBtn:active {
-      transform: translateY(1px);
-    }
-
-    button.copy-btn:hover,
-    button#copyAllBtn:hover {
-      filter: brightness(1.05);
-    }
-
-    button.copy-btn:disabled {
-      cursor: not-allowed;
-      opacity: 0.5;
-      filter: none;
-      transform: none;
-    }
-
-    .footer-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      align-items: center;
-      padding: 0 8px 32px;
-    }
-
-    .status {
-      min-height: 20px;
-      font-size: 0.9rem;
       color: var(--muted);
-      text-align: center;
+      font-size: 0.95rem;
     }
 
-    .status[data-state="success"] {
-      color: #3ecf8e;
+    .flag input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
     }
 
-    .status[data-state="error"] {
-      color: #ff6b6b;
-    }
-
-    .hidden {
-      display: none !important;
+    .result-block h2 {
+      margin: 0 0 4px;
+      font-size: 1.2rem;
+      letter-spacing: 0.2px;
     }
   </style>
 </head>
@@ -211,399 +145,100 @@
   <main>
     <header>
       <h1>System Transition Matrix</h1>
-      <p class="lead">Select the current and proposed system components to reveal the recommended mapping codes. Copy each note individually or combine everything into one clipboard string.</p>
+      <p class="lead">Select the existing and proposed configurations to generate the corresponding depot notes.</p>
     </header>
 
-    <div class="grid" id="sections"></div>
-
-    <div class="footer-actions">
-      <button id="copyAllBtn" disabled>Copy Depot Notes</button>
-      <div class="status" id="status" role="status" aria-live="polite"></div>
-    </div>
-  </main>
-
-  <template id="section-template">
     <section>
-      <h2></h2>
-      <div class="controls">
-        <label>
-          <span class="label-current"></span>
-          <select class="current-select"></select>
-        </label>
-        <label>
-          <span class="label-proposed"></span>
-          <select class="proposed-select"></select>
-        </label>
+      <div class="grid">
+        <div>
+          <h2>Boiler</h2>
+          <label>
+            <span>Current boiler</span>
+            <select id="boiler-from">
+              <option value="regular">Regular</option>
+              <option value="system">System</option>
+              <option value="combi">Combi</option>
+              <option value="warm_air">Warm air</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          <label>
+            <span>Proposed boiler</span>
+            <select id="boiler-to">
+              <option value="regular">Regular</option>
+              <option value="system">System</option>
+              <option value="combi">Combi</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <h2>Cylinder</h2>
+          <label>
+            <span>Current cylinder</span>
+            <select id="cyl-from">
+              <option value="vented">Vented</option>
+              <option value="unvented">Unvented</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+          <label>
+            <span>Proposed cylinder</span>
+            <select id="cyl-to">
+              <option value="vented">Vented</option>
+              <option value="unvented">Unvented</option>
+              <option value="none">None</option>
+            </select>
+          </label>
+        </div>
       </div>
-      <div class="result-box">
-        <textarea class="result" readonly placeholder="Select an option above"></textarea>
-        <button class="copy-btn" type="button" disabled>Copy</button>
+
+      <div class="grid">
+        <div>
+          <h2>Flue</h2>
+          <label>
+            <span>Current flue</span>
+            <select id="flue-from">
+              <option value="balanced">Balanced</option>
+              <option value="horizontal">Horizontal</option>
+              <option value="open">Open</option>
+              <option value="any">Any</option>
+            </select>
+          </label>
+          <label>
+            <span>Proposed flue</span>
+            <select id="flue-to">
+              <option value="fanned_horizontal">Fanned horizontal</option>
+              <option value="fanned_vertical">Fanned vertical</option>
+            </select>
+          </label>
+        </div>
+        <div>
+          <h2>Flags</h2>
+          <div class="flags">
+            <label class="flag"><input type="checkbox" id="flag-plume" />Plume kit required</label>
+            <label class="flag"><input type="checkbox" id="flag-noplume" />Plume kit not required</label>
+            <label class="flag"><input type="checkbox" id="flag-pump" />Shower pump present</label>
+          </div>
+        </div>
       </div>
     </section>
-  </template>
 
-  <script>
-    const sectionsConfig = [
-      {
-        id: "boiler",
-        title: "Boiler change",
-        mappingKey: "boiler_mappings",
-        prefix: "Blr",
-        depotTitle: "Boiler and controls",
-        currentLabel: "Current boiler",
-        proposedLabel: "Proposed boiler",
-        currentOptions: [
-          { label: "Regular", value: "regular" },
-          { label: "System", value: "system" },
-          { label: "Combi", value: "combi" },
-          { label: "Warm Air", value: "warm_air" },
-          { label: "None", value: "none" }
-        ],
-        proposedOptions: [
-          { label: "Regular", value: "regular" },
-          { label: "System", value: "system" },
-          { label: "Combi", value: "combi" }
-        ]
-      },
-      {
-        id: "flue",
-        title: "Flue change",
-        mappingKey: "flue_mappings",
-        prefix: "Flu",
-        depotTitle: "Flue",
-        currentLabel: "Current flue",
-        proposedLabel: "Proposed flue",
-        currentOptions: [
-          { label: "Balanced", value: "balanced" },
-          { label: "Horizontal", value: "horizontal" },
-          { label: "Direct Rear", value: "direct_rear" },
-          { label: "Vertical", value: "vertical" },
-          { label: "Open", value: "open" }
-        ],
-        proposedOptions: [
-          { label: "Fanned", value: "fanned" },
-          { label: "Vertical", value: "vertical" },
-          { label: "Plume Kit", value: "plume_kit" }
-        ]
-      },
-      {
-        id: "cylinder",
-        title: "Cylinder change",
-        mappingKey: "cylinder_mappings",
-        prefix: "Cyl",
-        depotTitle: "System characteristics (new)",
-        currentLabel: "Current cylinder",
-        proposedLabel: "Proposed cylinder",
-        currentOptions: [
-          { label: "Vented", value: "vented" },
-          { label: "Unvented", value: "unvented" },
-          { label: "Thermal Store", value: "thermal_store" },
-          { label: "None", value: "none" }
-        ],
-        proposedOptions: [
-          { label: "None", value: "none" },
-          { label: "Unvented", value: "unvented" },
-          { label: "Heatstore", value: "heatstore" }
-        ]
-      },
-      {
-        id: "condensate",
-        title: "Condensate waste",
-        mappingKey: "condensate_mappings",
-        prefix: "Cond",
-        depotTitle: "Pipework",
-        currentLabel: "Current waste",
-        proposedLabel: "Proposed waste",
-        currentOptions: [
-          { label: "None", value: "none" },
-          { label: "Internal", value: "internal" },
-          { label: "External", value: "external" },
-          { label: "Shared", value: "shared" },
-          { label: "Pumped", value: "pumped" }
-        ],
-        proposedOptions: [
-          { label: "Internal", value: "internal" },
-          { label: "External", value: "external" },
-          { label: "Pumped", value: "pumped" },
-          { label: "Gravity", value: "gravity" }
-        ]
-      }
-    ];
+    <section class="result-block">
+      <div>
+        <h2>Boiler and controls</h2>
+        <textarea id="boiler-notes" readonly></textarea>
+      </div>
+      <div>
+        <h2>Flue</h2>
+        <textarea id="flue-notes" readonly></textarea>
+      </div>
+      <div>
+        <h2>System characteristics (new)</h2>
+        <textarea id="system-new-notes" readonly></textarea>
+      </div>
+    </section>
+  </main>
 
-    const sectionsContainer = document.getElementById("sections");
-    const sectionTemplate = document.getElementById("section-template");
-    const statusEl = document.getElementById("status");
-    const copyAllBtn = document.getElementById("copyAllBtn");
-
-    let mappings = null;
-    let notesLookup = null;
-    let systemCharacteristics = {};
-    const sectionState = new Map();
-
-    function setStatus(message = "", state = "") {
-      statusEl.textContent = message;
-      if (state) {
-        statusEl.dataset.state = state;
-      } else {
-        statusEl.removeAttribute("data-state");
-      }
-    }
-
-    function resizeToContent(textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-
-    function createOptionElement({ label, value }) {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = label;
-      return option;
-    }
-
-    function formatKey(current, proposed) {
-      return `${current}_to_${proposed}`;
-    }
-
-    function formatDepotNote(rawCode, config) {
-      if (!rawCode || !notesLookup) {
-        return null;
-      }
-
-      const tokens = rawCode.trim().split(/\s+/);
-      if (!tokens.length) {
-        return null;
-      }
-
-      const prefix = tokens.shift();
-      const lookupGroup = notesLookup[prefix];
-      if (!lookupGroup || !lookupGroup.codes) {
-        return null;
-      }
-
-      const fragments = tokens.map((code) => lookupGroup.codes[code]).filter(Boolean);
-
-      if (fragments.length !== tokens.length) {
-        return null;
-      }
-
-      const title = lookupGroup.title || config.depotTitle;
-      const noteBody = fragments.join("; ");
-      return `${title}; ${noteBody};`;
-    }
-
-    function updateCopyAllState() {
-      const hasValues = Array.from(sectionState.values()).some((value) => value && !value.error && value.text);
-      copyAllBtn.disabled = !hasValues;
-    }
-
-    async function copyText(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch (error) {
-        console.error("Clipboard copy failed", error);
-        return false;
-      }
-    }
-
-    function appendSystemCharacteristics(baseText) {
-      if (!baseText) return baseText;
-
-      const boilerState = sectionState.get("boiler");
-      if (!boilerState) {
-        return baseText;
-      }
-
-      const currentBoiler = boilerState.currentSelect.value;
-      const proposedBoiler = boilerState.proposedSelect.value;
-
-      if (!currentBoiler || !proposedBoiler) {
-        return baseText;
-      }
-
-      const key = formatKey(currentBoiler, proposedBoiler);
-      const extraNotes = systemCharacteristics[key];
-
-      if (!Array.isArray(extraNotes) || !extraNotes.length) {
-        return baseText;
-      }
-
-      const trimmed = baseText.trim();
-      const withoutTrailing = trimmed.endsWith(";") ? trimmed.slice(0, -1) : trimmed;
-      const parts = withoutTrailing
-        .split(";")
-        .map((part) => part.trim())
-        .filter(Boolean);
-
-      extraNotes.forEach((note) => {
-        const cleaned = note.trim().replace(/;+$/, "");
-        if (cleaned) {
-          parts.push(cleaned);
-        }
-      });
-
-      return `${parts.join("; ")};`;
-    }
-
-    function updateSection(sectionId) {
-      const state = sectionState.get(sectionId);
-      const { resultEl, copyBtn, currentSelect, proposedSelect } = state;
-
-      if (!mappings || !notesLookup) {
-        resultEl.value = "Loading mappings…";
-        resultEl.setAttribute("aria-busy", "true");
-        copyBtn.disabled = true;
-        state.text = "";
-        state.error = true;
-        updateCopyAllState();
-        return;
-      }
-
-      const current = currentSelect.value;
-      const proposed = proposedSelect.value;
-
-      const key = formatKey(current, proposed);
-      const mappingGroup = mappings[state.mappingKey];
-      const result = mappingGroup ? mappingGroup[key] : undefined;
-
-      if (result) {
-        const formatted = formatDepotNote(result, state.config);
-        if (formatted) {
-          const finalText =
-            state.mappingKey === "cylinder_mappings" ? appendSystemCharacteristics(formatted) : formatted;
-          resultEl.value = finalText;
-          resultEl.removeAttribute("aria-busy");
-          copyBtn.disabled = false;
-          state.text = finalText;
-          state.error = false;
-        } else {
-          resultEl.value = `Missing lookup notes for ${result}`;
-          resultEl.setAttribute("aria-busy", "true");
-          copyBtn.disabled = true;
-          state.text = "";
-          state.error = true;
-        }
-      } else {
-        const pretty = `${currentSelect.options[currentSelect.selectedIndex].text} → ${proposedSelect.options[proposedSelect.selectedIndex].text}`;
-        resultEl.value = `No mapping available for ${pretty}`;
-        resultEl.setAttribute("aria-busy", "true");
-        copyBtn.disabled = true;
-        state.text = "";
-        state.error = true;
-      }
-
-      resizeToContent(resultEl);
-      updateCopyAllState();
-    }
-
-    function initSection(config) {
-      const { id, title, mappingKey, currentLabel, proposedLabel, currentOptions, proposedOptions } = config;
-      const fragment = sectionTemplate.content.cloneNode(true);
-      const h2 = fragment.querySelector("h2");
-      const currentLabelSpan = fragment.querySelector(".label-current");
-      const proposedLabelSpan = fragment.querySelector(".label-proposed");
-      const currentSelect = fragment.querySelector(".current-select");
-      const proposedSelect = fragment.querySelector(".proposed-select");
-      const resultEl = fragment.querySelector(".result");
-      const copyBtn = fragment.querySelector(".copy-btn");
-
-      h2.textContent = title;
-      currentLabelSpan.textContent = currentLabel;
-      proposedLabelSpan.textContent = proposedLabel;
-
-      currentOptions.forEach((option) => currentSelect.appendChild(createOptionElement(option)));
-      proposedOptions.forEach((option) => proposedSelect.appendChild(createOptionElement(option)));
-
-      const initialState = {
-        mappingKey,
-        config,
-        resultEl,
-        copyBtn,
-        currentSelect,
-        proposedSelect,
-        text: "",
-        error: true
-      };
-
-      sectionState.set(id, initialState);
-
-      resizeToContent(resultEl);
-
-      currentSelect.addEventListener("change", () => {
-        updateSection(id);
-        if (id === "boiler" && sectionState.has("cylinder")) {
-          updateSection("cylinder");
-        }
-      });
-      proposedSelect.addEventListener("change", () => {
-        updateSection(id);
-        if (id === "boiler" && sectionState.has("cylinder")) {
-          updateSection("cylinder");
-        }
-      });
-
-      copyBtn.addEventListener("click", async () => {
-        if (!initialState.text) return;
-        const ok = await copyText(initialState.text);
-        if (ok) {
-          setStatus(`${title} copied to clipboard`, "success");
-          window.setTimeout(() => setStatus(""), 2000);
-        } else {
-          setStatus("Clipboard copy blocked. Try copying manually.", "error");
-        }
-      });
-
-      sectionsContainer.appendChild(fragment);
-    }
-
-    async function loadData() {
-      try {
-        const [mappingsResponse, notesResponse] = await Promise.all([
-          fetch("data/mappings.json", { cache: "no-store" }),
-          fetch("data/notes_lookup.json", { cache: "no-store" })
-        ]);
-
-        if (!mappingsResponse.ok) {
-          throw new Error(`mappings.json HTTP ${mappingsResponse.status}`);
-        }
-
-        if (!notesResponse.ok) {
-          throw new Error(`notes_lookup.json HTTP ${notesResponse.status}`);
-        }
-
-        mappings = await mappingsResponse.json();
-        notesLookup = await notesResponse.json();
-        systemCharacteristics = notesLookup.system_characteristics || {};
-        delete notesLookup.system_characteristics;
-        sectionState.forEach((_, sectionId) => updateSection(sectionId));
-        setStatus("Mappings and notes loaded", "success");
-        window.setTimeout(() => setStatus(""), 2000);
-      } catch (error) {
-        console.error("Failed to load mappings", error);
-        setStatus("Could not load required data files from /data.", "error");
-      }
-    }
-
-    copyAllBtn.addEventListener("click", async () => {
-      const values = Array.from(sectionState.values())
-        .map((state) => state.text)
-        .filter(Boolean);
-
-      if (!values.length) return;
-
-      const combined = values.join("\n");
-      const ok = await copyText(combined);
-      if (ok) {
-        setStatus("All notes copied", "success");
-        window.setTimeout(() => setStatus(""), 2000);
-      } else {
-        setStatus("Clipboard copy blocked. Try copying manually.", "error");
-      }
-    });
-
-    sectionsConfig.forEach(initSection);
-    loadData();
-  </script>
+  <script src="script.js" type="module"></script>
 </body>
 </html>
