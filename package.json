@@ -1,0 +1,9 @@
+{
+  "name": "depot-notes-prototype",
+  "version": "1.0.0",
+  "description": "Utility helpers and prototype assets for the Depot Notes tool.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
