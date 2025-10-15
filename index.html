@@ -337,6 +337,7 @@
 
     let mappings = null;
     let notesLookup = null;
+    let systemCharacteristics = {};
     const sectionState = new Map();
 
     function setStatus(message = "", state = "") {
@@ -406,6 +407,45 @@
       }
     }
 
+    function appendSystemCharacteristics(baseText) {
+      if (!baseText) return baseText;
+
+      const boilerState = sectionState.get("boiler");
+      if (!boilerState) {
+        return baseText;
+      }
+
+      const currentBoiler = boilerState.currentSelect.value;
+      const proposedBoiler = boilerState.proposedSelect.value;
+
+      if (!currentBoiler || !proposedBoiler) {
+        return baseText;
+      }
+
+      const key = formatKey(currentBoiler, proposedBoiler);
+      const extraNotes = systemCharacteristics[key];
+
+      if (!Array.isArray(extraNotes) || !extraNotes.length) {
+        return baseText;
+      }
+
+      const trimmed = baseText.trim();
+      const withoutTrailing = trimmed.endsWith(";") ? trimmed.slice(0, -1) : trimmed;
+      const parts = withoutTrailing
+        .split(";")
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      extraNotes.forEach((note) => {
+        const cleaned = note.trim().replace(/;+$/, "");
+        if (cleaned) {
+          parts.push(cleaned);
+        }
+      });
+
+      return `${parts.join("; ")};`;
+    }
+
     function updateSection(sectionId) {
       const state = sectionState.get(sectionId);
       const { resultEl, copyBtn, currentSelect, proposedSelect } = state;
@@ -430,10 +470,12 @@
       if (result) {
         const formatted = formatDepotNote(result, state.config);
         if (formatted) {
-          resultEl.value = formatted;
+          const finalText =
+            state.mappingKey === "cylinder_mappings" ? appendSystemCharacteristics(formatted) : formatted;
+          resultEl.value = finalText;
           resultEl.removeAttribute("aria-busy");
           copyBtn.disabled = false;
-          state.text = formatted;
+          state.text = finalText;
           state.error = false;
         } else {
           resultEl.value = `Missing lookup notes for ${result}`;
@@ -488,8 +530,18 @@
 
       resizeToContent(resultEl);
 
-      currentSelect.addEventListener("change", () => updateSection(id));
-      proposedSelect.addEventListener("change", () => updateSection(id));
+      currentSelect.addEventListener("change", () => {
+        updateSection(id);
+        if (id === "boiler" && sectionState.has("cylinder")) {
+          updateSection("cylinder");
+        }
+      });
+      proposedSelect.addEventListener("change", () => {
+        updateSection(id);
+        if (id === "boiler" && sectionState.has("cylinder")) {
+          updateSection("cylinder");
+        }
+      });
 
       copyBtn.addEventListener("click", async () => {
         if (!initialState.text) return;
@@ -522,6 +574,8 @@
 
         mappings = await mappingsResponse.json();
         notesLookup = await notesResponse.json();
+        systemCharacteristics = notesLookup.system_characteristics || {};
+        delete notesLookup.system_characteristics;
         sectionState.forEach((_, sectionId) => updateSection(sectionId));
         setStatus("Mappings and notes loaded", "success");
         window.setTimeout(() => setStatus(""), 2000);
