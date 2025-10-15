@@ -1,0 +1,73 @@
+{
+  "Blr": {
+    "title": "Boiler and controls",
+    "codes": {
+      "a1": "Remove existing regular boiler, header tank and associated wiring",
+      "a2": "Remove existing system boiler and wiring centre",
+      "a3": "Remove existing combination boiler and flue",
+      "a4": "Remove existing warm air unit and redundant ducting",
+      "a5": "No existing boiler on site",
+      "b1": "Install new regular boiler on open vented circuit with new wiring centre",
+      "b2": "Install new system boiler on sealed system with integrated pump and expansion vessel",
+      "b3": "Install new combination boiler with integrated filling loop and DHW outlets"
+    }
+  },
+  "Flu": {
+    "title": "Flue",
+    "codes": {
+      "a1": "Remove existing balanced flue terminal and back panel",
+      "a2": "Remove existing horizontal flue terminal and wall sleeve",
+      "a3": "Remove existing direct rear outlet flue",
+      "a4": "Remove existing vertical flue through roof and weathering kit",
+      "a5": "Remove existing open flue and make safe fireplace opening",
+      "b1": "Install new fanned flue horizontal kit with wall terminal",
+      "b2": "Install new vertical flue through roof with approved flashing kit",
+      "b3": "Install new plume displacement kit to suit termination",
+      "t3": "Add plume kit with extensions and 45° elbows as required",
+      "t4": "Core new flue route and make good internal and external finishes",
+      "t5": "Install roof flashing kit and weatherproof seals to suit new route",
+      "t6": "Extend flue length and provide support brackets as required",
+      "t7": "Seal redundant openings and make good internally and externally",
+      "t8": "Provide flat roof flashing kit and weatherproof detailing",
+      "t9": "Install plume displacement kit to direct flue products clear of openings"
+    }
+  },
+  "Cyl": {
+    "title": "System characteristics (new)",
+    "codes": {
+      "a0": "No existing cylinder on site",
+      "a1": "Remove existing vented cylinder, feed and expansion tank and associated pipework",
+      "a2": "Remove existing unvented cylinder and discharge pipework",
+      "a3": "Remove existing thermal store or combination cylinder",
+      "b0": "No replacement cylinder required (combi upgrade)",
+      "b1": "Install new unvented cylinder with pressure reducing valve and discharge pipework to G3 standards",
+      "b2": "Install new thermal store with primary heat exchanger and blending valve",
+      "t1": "Cap redundant cold feed and vent connections safely",
+      "t2": "Install discharge pipework to compliant tundish termination",
+      "t3": "Connect primary circuit controls and sensors to suit new cylinder",
+      "t4": "Commission blending valve and set correct stored temperatures"
+    }
+  },
+  "Cond": {
+    "title": "Pipework",
+    "codes": {
+      "a0": "No existing condensate provision",
+      "a1": "Existing internal condensate route to waste",
+      "a2": "Existing external condensate to soakaway",
+      "a3": "Shared condensate with another appliance",
+      "a4": "Existing condensate pump serving appliance",
+      "b1": "Provide new internal condensate route to waste with continuous fall",
+      "b2": "Provide new external condensate route in 32mm pipework, fully lagged",
+      "b3": "Install new condensate pump with flexible discharge hose",
+      "b4": "Install separate condensate run for new appliance",
+      "t3": "Provide new trap and visible air break before connection to internal waste",
+      "t4": "Terminate to external soakaway or gully with insulation",
+      "t5": "Remove redundant route and connect new discharge to suit layout",
+      "t6": "Install gravity drain with continuous fall and insulate exposed sections",
+      "t7": "Remove condensate pump and reconnect appliance to gravity drain",
+      "t8": "Upgrade external run with 32mm insulated pipework and secure brackets",
+      "t9": "Provide dedicated discharge route and remove shared connections",
+      "t10": "Decommission existing pump and reconnect to gravity drain with insulation"
+    }
+  }
+}
