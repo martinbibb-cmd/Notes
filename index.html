@@ -552,3 +552,530 @@ function initControls(){
 </script>
 </body>
 </html>
+<script>
+/* ===========================
+   Dynamic Options loader for Options.txt / Options.text
+   - Supports lines like:
+     [Needs]
+     NE01 | Need | Better water pressure
+   - Ignores blanks and lines starting with '#'
+   =========================== */
+
+// Preferred display order of Depot sections (others will append at end)
+const PREFERRED_ORDER = [
+  "Needs",
+  "Working at heights",
+  "System characteristics – old",
+  "System characteristics – new",
+  "Components that require assistance",
+  "Restrictions",
+  "Hazards",
+  "Delivery",
+  "Office",
+  "Boiler and controls",
+  "Flue",
+  "Pipe"
+];
+
+// Map group headers (from [ … ]) to Depot section + step label
+function metaForGroup(headerRaw){
+  const h = headerRaw.trim();
+  const hl = h.toLowerCase();
+
+  // Explicit matches first
+  if (hl === "needs") return { section:"Needs", step:"Needs" };
+  if (hl === "working at heights" || hl === "wah") return { section:"Working at heights", step:"Safety & Access" };
+
+  // System characteristics heuristics
+  if (hl.includes("system") && hl.includes("characteristic")) {
+    if (/(old|existing)/i.test(h)) return { section:"System characteristics – old", step:"System – Old" };
+    if (/(new|proposed)/i.test(h)) return { section:"System characteristics – new", step:"System – New" };
+    return { section:"System characteristics – old", step:"System – Old" }; // sensible default
+  }
+
+  // Common groups
+  if (hl.includes("hazard")) return { section:"Hazards", step:"Safety & Access" };
+  if (hl.includes("delivery")) return { section:"Delivery", step:"Logistics" };
+  if (hl.includes("office")) return { section:"Office", step:"Admin" };
+  if (hl.includes("boiler") && hl.includes("control")) return { section:"Boiler and controls", step:"Appliance" };
+  if (hl === "flue" || hl.includes("flue")) return { section:"Flue", step:"Appliance" };
+  if (hl === "pipe" || hl.includes("pipe")) return { section:"Pipe", step:"Appliance" };
+  if (hl.includes("component") && hl.includes("assistance")) return { section:"Components that require assistance", step:"Resources" };
+  if (hl.includes("restriction")) return { section:"Restrictions", step:"Site" };
+
+  // Fallback: use header as section and put in Misc step
+  return { section: h, step:"Misc" };
+}
+
+function parseOptionsTxt(text){
+  const groups = [];
+  let current = null;
+
+  const pushGroup = () => { if(current && current.options.length) groups.push(current); };
+
+  const lines = text.split(/\r?\n/);
+  for (let raw of lines){
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+
+    // Header like [Needs]
+    const m = line.match(/^\[(.+?)\]$/);
+    if (m){
+      // close previous
+      pushGroup();
+      const header = m[1].trim();
+      const meta = metaForGroup(header);
+      current = {
+        groupId: header.toLowerCase().replace(/\s+/g,'-'),
+        header,
+        label: header,       // UI
+        section: meta.section, // Depot section
+        step: meta.step,       // Step bucket
+        options: []
+      };
+      continue;
+    }
+
+    // Expect "CODE | Category | Label" (allow extra pipes; we take first and last fields)
+    if (!current) continue; // ignore stray lines before first header
+    const parts = line.split("|").map(s=>s.trim());
+    if (parts.length >= 2){
+      const code = parts[0];
+      const label = parts[parts.length - 1]; // last field = user-facing label
+      if (code && label){
+        current.options.push({
+          code,
+          short: label,
+          long: label // we can later extend with richer text if needed
+        });
+      }
+    }
+  }
+  pushGroup();
+  return groups;
+}
+
+// Try fetching Options.txt then Options.text
+async function fetchOptionsFile(){
+  const tries = ["Options.txt", "Options.text"]; // case-sensitive on Pages
+  for (const path of tries){
+    try{
+      const res = await fetch(path, { cache: "no-store" });
+      if (res.ok){
+        const txt = await res.text();
+        if (txt && txt.trim().length) return { path, text: txt };
+      }
+    }catch(e){ /* ignore and try next */ }
+  }
+  return null;
+}
+
+/* ===========================
+   App State & Utilities (same API as before)
+   =========================== */
+let OPTIONS = []; // now dynamic
+const ROUTING_RULES = {}; // keep free for future overrides
+
+const state = {
+  picks: new Set(),
+  notesFreeform: {},
+  settings: {
+    showCodes: true,
+    arrow: false,
+    compact: false,
+    remember: true,
+    mode: "Standard",
+    delimiter: ";"
+  }
+};
+
+const el = s => document.querySelector(s);
+const els = s => [...document.querySelectorAll(s)];
+
+function save(){
+  if(!state.settings.remember) return;
+  localStorage.setItem("dnqp_state", JSON.stringify({
+    picks:[...state.picks],
+    notesFreeform: state.notesFreeform,
+    settings: state.settings
+  }));
+}
+function load(){
+  const raw = localStorage.getItem("dnqp_state");
+  if(!raw) return false;
+  try{
+    const obj = JSON.parse(raw);
+    state.picks = new Set(obj.picks||[]);
+    state.notesFreeform = obj.notesFreeform||{};
+    state.settings = Object.assign(state.settings, obj.settings||{});
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ===========================
+   Dynamic steps & sections from loaded OPTIONS
+   =========================== */
+function unique(arr){ return [...new Set(arr)]; }
+
+function computedStepOrder(){
+  // Derive from OPTIONS and sort by a sensible default order
+  const steps = unique(OPTIONS.map(g=>g.step));
+  const preferred = ["Needs","Safety & Access","System – Old","System – New","Appliance","Site","Resources","Logistics","Admin","Misc"];
+  const order = [...preferred, ...steps.filter(s=>!preferred.includes(s))];
+  return order.filter(s=>steps.includes(s));
+}
+
+// Mode → which steps to show
+function MODE_STEPS(mode){
+  const full = computedStepOrder();
+  if (mode === "Lite"){
+    // Show the first 2–3 key steps if present
+    return full.filter(s => ["Needs","Safety & Access","Appliance"].includes(s)).slice(0,3);
+  }
+  if (mode === "Full") return full;
+  // Standard
+  const keep = new Set(["Needs","Safety & Access","System – Old","System – New","Appliance"]);
+  const std = full.filter(s => keep.has(s));
+  return std.length ? std : full.slice(0,5);
+}
+
+// Sections order (copy boxes)
+function computedSectionsOrder(){
+  const discovered = unique(OPTIONS.map(g=>g.section));
+  const ordered = [...PREFERRED_ORDER, ...discovered.filter(s=>!PREFERRED_ORDER.includes(s))];
+  return ordered;
+}
+
+/* ===========================
+   UI (same components, now data-driven)
+   =========================== */
+function getVisibleGroups(){
+  const wantedSteps = MODE_STEPS(state.settings.mode);
+  return OPTIONS.filter(g => wantedSteps.includes(g.step));
+}
+
+function renderStepper(){
+  const steps = unique(getVisibleGroups().map(g=>g.step));
+  const stepper = el("#stepper");
+  stepper.innerHTML = "";
+  steps.forEach((s,i)=>{
+    const b = document.createElement("button");
+    b.className = "step" + (i===0?" active":"");
+    b.textContent = s;
+    b.dataset.step = s;
+    b.onclick = ()=>{
+      els(".step").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      renderStep(s);
+    };
+    stepper.appendChild(b);
+  });
+}
+
+function renderStep(stepName){
+  const wrap = el("#stepWrap");
+  const groups = getVisibleGroups().filter(g=>g.step===stepName);
+  wrap.innerHTML = "";
+
+  if (!groups.length){
+    wrap.innerHTML = `<div class="muted small">No groups for this step.</div>`;
+    return;
+  }
+
+  groups.forEach(group=>{
+    const sec = document.createElement("section");
+    sec.className = "panel";
+    sec.innerHTML = `
+      <h2>${group.label}</h2>
+      <div class="search">
+        <span class="muted small">Filter</span>
+        <input type="search" placeholder="Type to filter ${group.label.toLowerCase()}..." data-for="${group.groupId}" />
+        <button class="btn ghost small" data-clear="${group.groupId}">Clear</button>
+      </div>
+      <div class="chips" id="chips_${group.groupId}"></div>
+      <div class="spacer"></div>
+      <div class="thin">
+        <div class="row" style="justify-content:space-between;">
+          <div class="muted small">Quick note to <strong>${group.section}</strong></div>
+          <button class="btn small" data-addnote="${group.section}">Add</button>
+        </div>
+        <input type="text" id="note_${group.section}" placeholder="Free text (kept local)" style="width:100%;padding:10px;background:#0f1318;border:1px solid var(--line);border-radius:8px;color:var(--ink)">
+      </div>
+    `;
+    wrap.appendChild(sec);
+
+    renderChips(group.groupId);
+
+    sec.querySelector(`input[data-for="${group.groupId}"]`).addEventListener("input", (e)=>{
+      renderChips(group.groupId, e.target.value.trim().toLowerCase());
+    });
+    sec.querySelector(`[data-clear="${group.groupId}"]`).onclick = ()=>{
+      state.picks = new Set([...state.picks].filter(key=>!key.startsWith(group.groupId+"|")));
+      renderChips(group.groupId);
+      renderCopyBoxes();
+      save();
+    };
+    sec.querySelector(`[data-addnote="${group.section}"]`).onclick = ()=>{
+      const v = sec.querySelector(`#note_${group.section}`).value.trim();
+      if(!v) return;
+      if(!state.notesFreeform[group.section]) state.notesFreeform[group.section]=[];
+      state.notesFreeform[group.section].push(v);
+      sec.querySelector(`#note_${group.section}`).value = "";
+      renderCopyBoxes();
+      save();
+    };
+  });
+}
+
+function renderChips(groupId, filter=""){
+  const group = OPTIONS.find(g=>g.groupId===groupId);
+  const host = el(`#chips_${groupId}`);
+  host.innerHTML = "";
+  (group?.options||[])
+    .filter(o => (o.code+" "+o.short+" "+(o.long||"")).toLowerCase().includes(filter))
+    .forEach(opt=>{
+      const key = groupId+"|"+opt.code;
+      const p = document.createElement("button");
+      p.className = "pill"+(state.picks.has(key)?" active":"");
+      p.innerHTML = `<input type="checkbox" ${state.picks.has(key)?"checked":""} /> <strong>${opt.short}</strong><span class="muted small">${opt.code}</span>`;
+      p.onclick = ()=>{
+        if(state.picks.has(key)) state.picks.delete(key); else state.picks.add(key);
+        p.classList.toggle("active");
+        renderCopyBoxes();
+        save();
+      };
+      host.appendChild(p);
+    });
+}
+
+function toSectionFor(code, defaultSection){
+  return ROUTING_RULES[code] || defaultSection;
+}
+
+function buildLinesForSection(sectionName){
+  const picks = [...state.picks].map(key=>{
+    const [groupId, code] = key.split("|");
+    const group = OPTIONS.find(g=>g.groupId===groupId);
+    const opt = group?.options.find(o=>o.code===code);
+    if(!group || !opt) return null;
+    return { section: toSectionFor(code, group.section), code, short: opt.short, long: opt.long };
+  }).filter(Boolean);
+
+  const selectedForSection = picks.filter(p=>p.section===sectionName);
+
+  const useLong = (state.settings.mode === "Full");
+  const textBits = selectedForSection.map(p=>{
+    const label = (useLong && p.long) ? p.long : p.short;
+    const codeStr = state.settings.showCodes ? `${p.code} – ` : "";
+    return codeStr + label;
+  });
+
+  const free = state.notesFreeform[sectionName] || [];
+  textBits.push(...free);
+
+  const prefix = state.settings.arrow ? "↘️ " : "";
+  const delim = state.settings.delimiter === "\\n" ? "\n" : state.settings.delimiter;
+
+  let out = textBits.map(t => (prefix + (state.settings.compact ? t.replace(/\s+/g," ") : t))).join(delim + " ");
+  return out;
+}
+
+function renderCopyBoxes(){
+  const host = el("#copyBoxes");
+  host.innerHTML = "";
+
+  const sections = computedSectionsOrder();
+  if (!sections.length){
+    host.innerHTML = `
+      <div class="thin">
+        <strong>No options loaded.</strong>
+        <div class="muted small">Add <code>Options.txt</code> to the repo root using your <code>[Group]</code> + <code>CODE | Category | Label</code> format, then refresh.</div>
+      </div>`;
+    return;
+  }
+
+  sections.forEach(sec=>{
+    const val = buildLinesForSection(sec) || "";
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `
+      <div class="copybar">
+        <strong>${sec}</strong>
+        <span class="muted small right">${(val && val.trim())? "Auto-built" : "Empty"}</span>
+      </div>
+      <textarea class="copy" data-sec="${sec}" spellcheck="false">${val}</textarea>
+      <div class="copybar">
+        <button class="btn small" data-copy="${sec}">Copy</button>
+        <button class="btn small" data-clearsec="${sec}">Clear section</button>
+        <span class="muted small">Editable. Changes won’t alter selections.</span>
+      </div>
+    `;
+    host.appendChild(wrap);
+  });
+
+  els("[data-copy]").forEach(b=>{
+    b.onclick = ()=>{
+      const sec = b.getAttribute("data-copy");
+      const ta = document.querySelector(`textarea[data-sec="${sec}"]`);
+      ta.select(); document.execCommand("copy");
+      b.textContent = "Copied";
+      setTimeout(()=>b.textContent="Copy",800);
+    };
+  });
+  els("[data-clearsec]").forEach(b=>{
+    b.onclick = ()=>{
+      const sec = b.getAttribute("data-clearsec");
+      if(confirm(`Clear selections and notes for "${sec}"?`)){
+        for(const key of [...state.picks]){
+          const [groupId, code] = key.split("|");
+          const group = OPTIONS.find(g=>g.groupId===groupId);
+          if(!group) continue;
+          const section = toSectionFor(code, group.section);
+          if(section===sec) state.picks.delete(key);
+        }
+        delete state.notesFreeform[sec];
+        renderStepper();
+        const first = (MODE_STEPS(state.settings.mode)||[])[0];
+        renderStep(first);
+        renderCopyBoxes();
+        save();
+      }
+    };
+  });
+}
+
+/* ===========================
+   Controls (unchanged)
+   =========================== */
+function initControls(){
+  el("#modeBtn").onclick = ()=>{
+    const next = state.settings.mode==="Lite"?"Standard":state.settings.mode==="Standard"?"Full":"Lite";
+    state.settings.mode = next;
+    el("#modeLabel").textContent = next;
+    renderStepper();
+    const first = (MODE_STEPS(next)||[])[0];
+    renderStep(first);
+    renderCopyBoxes();
+    save();
+  };
+
+  el("#restoreBtn").onclick = ()=>{
+    const ok = load();
+    if(ok){
+      el("#modeLabel").textContent = state.settings.mode;
+      renderStepper();
+      const first = (MODE_STEPS(state.settings.mode)||[])[0];
+      renderStep(first);
+      renderCopyBoxes();
+      alert("Restored last session.");
+    }else{
+      alert("No saved session found.");
+    }
+  };
+
+  const drawer = el("#drawer");
+  el("#gearBtn").onclick = ()=> drawer.classList.add("open");
+  el("#closeDrawer").onclick = ()=> drawer.classList.remove("open");
+
+  el("#optShowCodes").onchange = e=>{ state.settings.showCodes = e.target.checked; renderCopyBoxes(); save(); };
+  el("#optArrow").onchange     = e=>{ state.settings.arrow = e.target.checked;     renderCopyBoxes(); save(); };
+  el("#optCompact").onchange   = e=>{ state.settings.compact = e.target.checked;   renderCopyBoxes(); save(); };
+  el("#optRemember").onchange  = e=>{ state.settings.remember = e.target.checked;  save(); };
+
+  els('input[name="mode"]').forEach(r=>{
+    r.onchange = ()=>{
+      if(r.checked){
+        state.settings.mode = r.value;
+        el("#modeLabel").textContent = r.value;
+        renderStepper();
+        const first = (MODE_STEPS(state.settings.mode)||[])[0];
+        renderStep(first);
+        renderCopyBoxes();
+        save();
+      }
+    };
+  });
+
+  els('button[data-delim]').forEach(b=>{
+    b.onclick = ()=>{
+      state.settings.delimiter = b.getAttribute("data-delim");
+      el("#delimLabel").textContent = state.settings.delimiter === "\\n" ? "New line" : state.settings.delimiter;
+      renderCopyBoxes(); save();
+    };
+  });
+
+  el("#copyAllBtn").onclick = ()=>{
+    const sections = computedSectionsOrder();
+    const parts = sections.map(sec=>{
+      const ta = document.querySelector(`textarea[data-sec="${sec}"]`);
+      const val = (ta?.value||"").trim();
+      return val ? `# ${sec}\n${val}` : `# ${sec}\n`;
+    }).join("\n\n");
+    const tmp = document.createElement("textarea");
+    tmp.value = parts;
+    document.body.appendChild(tmp);
+    tmp.select(); document.execCommand("copy"); tmp.remove();
+    el("#copyAllBtn").textContent = "Copied All";
+    setTimeout(()=>el("#copyAllBtn").textContent = "Copy All",900);
+  };
+
+  el("#clearBtn").onclick = ()=>{
+    if(!confirm("Clear ALL selections and notes?")) return;
+    state.picks.clear();
+    state.notesFreeform = {};
+    renderStepper();
+    const first = (MODE_STEPS(state.settings.mode)||[])[0];
+    renderStep(first);
+    renderCopyBoxes();
+    save();
+  };
+}
+
+/* ===========================
+   Boot: load Options file then render
+   =========================== */
+(async function boot(){
+  // Initial UI state
+  el("#delimLabel").textContent = state.settings.delimiter;
+  load();
+  el("#modeLabel").textContent = state.settings.mode;
+  el("#optShowCodes").checked = state.settings.showCodes;
+  el("#optArrow").checked = state.settings.arrow;
+  el("#optCompact").checked = state.settings.compact;
+  el("#optRemember").checked = state.settings.remember;
+  els('input[name="mode"]').forEach(r=>r.checked = (r.value===state.settings.mode));
+
+  // Try to fetch Options file
+  const found = await fetchOptionsFile();
+  if (!found){
+    // Show an inline notice and keep the UI alive
+    OPTIONS = [];
+    el("#stepper").innerHTML = "";
+    el("#stepWrap").innerHTML = `
+      <section class="panel">
+        <h2>Options not found</h2>
+        <div class="thin">
+          <div class="muted small">
+            Place <code>Options.txt</code> at the repo root.<br>
+            Example format:<br><br>
+            <pre>[Needs]
+NE01 | Need | Better water pressure
+NE02 | Need | Faster hot water delivery</pre>
+          </div>
+        </div>
+      </section>`;
+    renderCopyBoxes();
+    initControls();
+    return;
+  }
+
+  const parsed = parseOptionsTxt(found.text);
+  OPTIONS = parsed;
+
+  // Render
+  renderStepper();
+  const first = (MODE_STEPS(state.settings.mode)||[])[0] || (computedStepOrder()[0]||"");
+  if (first) renderStep(first); else el("#stepWrap").innerHTML = `<div class="muted small">No steps.</div>`;
+  renderCopyBoxes();
+  initControls();
+})();
+</script>
