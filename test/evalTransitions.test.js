@@ -1,103 +1,70 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import { evalTransitions } from "../src/evalTransitions.js";
 
-const lookup = {
-  notes: {
-    sn01: "System note 1",
-    sn02: "System note 2",
-    fl01: "Flue note base",
-    fl02: "Flue override",
-    cx01: "Context flag note"
-  }
-};
+const lookup = JSON.parse(readFileSync(new URL("../data/notes_lookup.json", import.meta.url), "utf8"));
+const rules = JSON.parse(readFileSync(new URL("../data/rules.json", import.meta.url), "utf8"));
 
-const baseRules = {
-  boiler_transitions: [
-    { when: { from: "regular", to: "system" }, add: ["sn01"] },
-    { when: { from: "regular", to: "system" }, add: ["sn02"] }
-  ],
-  cylinder_transitions: [
-    { when: { from: "vented", to: "none" }, add: ["sn01"] }
-  ],
-  flue_transitions: [
-    { when: { from: "any", to: "plume" }, add: ["fl01"] },
-    { when: { from: "balanced", to: "vertical" }, add: ["fl02"] }
-  ],
-  flue_overrides: [
-    { flag: "plumeKit", when_to: ["plume"], add: ["fl02"] }
-  ],
-  context_flags: [
-    { flag: "hasPump", on_boiler_to: ["system"], add: ["cx01"] }
-  ]
-};
+test("evaluates boiler, cylinder, and flue transitions with plume override", () => {
+  const state = {
+    boiler: { from: "regular", to: "regular" },
+    cylinder: { from: "vented", to: "vented" },
+    flue: { from: "balanced", to: "fanned_horizontal" },
+    flags: { plume_required: true }
+  };
 
-test("collects unique notes from matching transitions", () => {
-  const result = evalTransitions(
-    {
-      fromBoiler: "regular",
-      toBoiler: "system",
-      fromCylinder: "vented",
-      toCylinder: "none",
-      fromFlue: "balanced",
-      toFlue: "plume",
-      flags: { plumeKit: true, hasPump: true }
-    },
-    baseRules,
-    lookup
-  );
+  const result = evalTransitions(state, rules, lookup);
 
   assert.deepStrictEqual(result, {
-    boilerNotes: [],
-    flueNotes: ["Flue note base", "Flue override"],
-    systemNewNotes: ["System note 1", "System note 2", "Context flag note"],
-    pipeNotes: []
+    systemNew: [
+      lookup.notes.keep_open_vent,
+      lookup.notes.retain_vented_cyl
+    ],
+    flue: [
+      lookup.notes.fanned_horizontal,
+      lookup.notes.terminal_clearances,
+      lookup.notes.plume_kit
+    ]
   });
 });
 
-test("ignores unknown keys and inactive flags", () => {
-  const result = evalTransitions(
-    {
-      fromBoiler: "system",
-      toBoiler: "combi",
-      fromCylinder: "unvented",
-      toCylinder: "heatstore",
-      fromFlue: "vertical",
-      toFlue: "vertical",
-      flags: { plumeKit: false }
-    },
-    baseRules,
-    lookup
-  );
+test("deduplicates notes and applies context flags for shower pumps", () => {
+  const state = {
+    boiler: { from: "system", to: "combi" },
+    cylinder: { from: "unvented", to: "none" },
+    flue: { from: "open", to: "fanned_horizontal" },
+    flags: { shower_pump_present: true }
+  };
+
+  const result = evalTransitions(state, rules, lookup);
 
   assert.deepStrictEqual(result, {
-    boilerNotes: [],
-    flueNotes: [],
-    systemNewNotes: [],
-    pipeNotes: []
+    systemNew: [
+      lookup.notes.dhw_now_mains,
+      lookup.notes.remove_shower_pumps,
+      lookup.notes.no_replacement_cyl
+    ],
+    flue: [
+      lookup.notes.fanned_horizontal,
+      lookup.notes.terminal_clearances
+    ]
   });
 });
 
-test("handles missing rule groups gracefully", () => {
-  const result = evalTransitions(
-    {
-      fromBoiler: "regular",
-      toBoiler: "system",
-      fromCylinder: "vented",
-      toCylinder: "none",
-      fromFlue: "balanced",
-      toFlue: "plume",
-      flags: { plumeKit: true }
-    },
-    {},
-    lookup
-  );
+test("handles missing transitions by returning empty arrays", () => {
+  const state = {
+    boiler: { from: "system", to: "system" },
+    cylinder: { from: "none", to: "none" },
+    flue: { from: "balanced", to: "balanced" },
+    flags: {}
+  };
+
+  const result = evalTransitions(state, rules, lookup);
 
   assert.deepStrictEqual(result, {
-    boilerNotes: [],
-    flueNotes: [],
-    systemNewNotes: [],
-    pipeNotes: []
+    systemNew: [],
+    flue: []
   });
 });

@@ -202,6 +202,84 @@
       color: #ff6b6b;
     }
 
+    .transition-tool {
+      display: grid;
+      gap: 16px;
+    }
+
+    .transition-tool h2 {
+      margin: 0;
+      font-size: 1.35rem;
+      letter-spacing: 0.2px;
+    }
+
+    .transition-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .transition-flags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 8px 0;
+    }
+
+    .transition-flags label {
+      display: inline-flex !important;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .transition-tool textarea {
+      width: 100%;
+      min-height: 80px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(9, 12, 16, 0.65);
+      color: var(--ink);
+      font: 600 0.95rem/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      padding: 12px;
+      resize: vertical;
+    }
+
+    .transition-tool button.generate-btn {
+      justify-self: start;
+      background: linear-gradient(135deg, rgba(74, 163, 255, 0.85), rgba(74, 163, 255, 0.6));
+      border: none;
+      color: #06111f;
+      font: 600 0.95rem/1 "Inter", sans-serif;
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .transition-tool button.generate-btn:hover {
+      filter: brightness(1.05);
+    }
+
+    .transition-tool button.generate-btn:active {
+      transform: translateY(1px);
+    }
+
+    .transition-tool pre {
+      margin: 0;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(9, 12, 16, 0.5);
+      color: var(--muted);
+      font-size: 0.85rem;
+      max-height: 200px;
+      overflow: auto;
+    }
+
     .hidden {
       display: none !important;
     }
@@ -213,6 +291,76 @@
       <h1>System Transition Matrix</h1>
       <p class="lead">Select the current and proposed system components to reveal the recommended mapping codes. Copy each note individually or combine everything into one clipboard string.</p>
     </header>
+
+    <section class="transition-tool" aria-labelledby="transition-tool-title">
+      <h2 id="transition-tool-title">Transition-aware Depot notes</h2>
+      <p class="lead" style="font-size:0.95rem; color: var(--muted); margin: 0;">
+        Use the rule engine to produce the transition-aware notes for the Depot template.
+      </p>
+      <div class="transition-form">
+        <!-- Boiler -->
+        <label>Current boiler
+          <select id="boiler-from">
+            <option value="regular">Regular (open vent)</option>
+            <option value="system">System (sealed)</option>
+            <option value="combi">Combi</option>
+          </select>
+        </label>
+        <label>Proposed boiler
+          <select id="boiler-to">
+            <option value="regular">Regular (open vent)</option>
+            <option value="system">System (sealed)</option>
+            <option value="combi">Combi</option>
+          </select>
+        </label>
+
+        <!-- Cylinder (thermal store removed by design) -->
+        <label>Current cylinder
+          <select id="cyl-from">
+            <option value="vented">Vented</option>
+            <option value="unvented">Unvented</option>
+            <option value="none">None</option>
+          </select>
+        </label>
+        <label>Proposed cylinder
+          <select id="cyl-to">
+            <option value="vented">Vented</option>
+            <option value="unvented">Unvented</option>
+            <option value="none">None</option>
+          </select>
+        </label>
+
+        <!-- Flue -->
+        <label>Current flue
+          <select id="flue-from">
+            <option value="balanced">Balanced</option>
+            <option value="open">Open</option>
+            <option value="horizontal">Fanned horizontal</option>
+          </select>
+        </label>
+        <label>Proposed flue
+          <select id="flue-to">
+            <option value="fanned_horizontal">Fanned horizontal</option>
+            <option value="fanned_vertical">Fanned vertical</option>
+          </select>
+        </label>
+
+        <!-- Flags -->
+        <div class="transition-flags">
+          <label><input type="checkbox" id="flag-plume"> Plume kit required</label>
+          <label><input type="checkbox" id="flag-noplume"> Plume not required</label>
+          <label><input type="checkbox" id="flag-pump"> Shower pump present</label>
+        </div>
+
+        <button class="generate-btn" type="button" onclick="generateDepotNotes()">Generate Depot Notes</button>
+
+        <!-- Output copy boxes -->
+        <textarea id="system-new-notes" rows="4" placeholder="System characteristics (new)"></textarea>
+        <textarea id="flue-notes" rows="3" placeholder="Flue notes"></textarea>
+
+        <pre id="debug" style="opacity:0.6;"></pre>
+      </div>
+    </section>
 
     <div class="grid" id="sections"></div>
 
@@ -604,6 +752,101 @@
 
     sectionsConfig.forEach(initSection);
     loadData();
+  </script>
+  <script type="module">
+    import { evalTransitions } from "./src/evalTransitions.js";
+
+    const dataCache = {
+      lookup: null,
+      rules: null
+    };
+
+    async function loadJSON(path) {
+      const response = await fetch(path, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`${path} HTTP ${response.status}`);
+      }
+      return response.json();
+    }
+
+    async function ensureData() {
+      if (!dataCache.lookup || !dataCache.rules) {
+        const [lookup, rules] = await Promise.all([
+          loadJSON("./data/notes_lookup.json"),
+          loadJSON("./data/rules.json")
+        ]);
+        dataCache.lookup = lookup;
+        dataCache.rules = rules;
+      }
+      return dataCache;
+    }
+
+    function formatDepotBlock(title, notes) {
+      const fragments = Array.isArray(notes) ? notes : [];
+      const parts = [title, ...fragments];
+      return `${parts.join("; ")};`;
+    }
+
+    function readState() {
+      const getValue = (selector) => {
+        const el = document.querySelector(selector);
+        return el ? el.value : "";
+      };
+
+      return {
+        boiler: {
+          from: getValue("#boiler-from"),
+          to: getValue("#boiler-to")
+        },
+        cylinder: {
+          from: getValue("#cyl-from"),
+          to: getValue("#cyl-to")
+        },
+        flue: {
+          from: getValue("#flue-from"),
+          to: getValue("#flue-to")
+        },
+        flags: {
+          plume_required: Boolean(document.querySelector("#flag-plume")?.checked),
+          plume_not_required: Boolean(document.querySelector("#flag-noplume")?.checked),
+          shower_pump_present: Boolean(document.querySelector("#flag-pump")?.checked)
+        }
+      };
+    }
+
+    function setOutput(selector, value) {
+      const element = document.querySelector(selector);
+      if (element) {
+        element.value = value;
+      }
+    }
+
+    function setDebug(state, result) {
+      const element = document.querySelector("#debug");
+      if (element) {
+        element.textContent = JSON.stringify({ state, result }, null, 2);
+      }
+    }
+
+    async function generateDepotNotes() {
+      const state = readState();
+
+      try {
+        const { lookup, rules } = await ensureData();
+        const result = evalTransitions(state, rules, lookup);
+
+        setOutput("#system-new-notes", formatDepotBlock("System characteristics (new)", result.systemNew));
+        setOutput("#flue-notes", formatDepotBlock("Flue", result.flue));
+        setDebug(state, result);
+      } catch (error) {
+        console.error("Failed to generate Depot notes", error);
+        setOutput("#system-new-notes", "Error generating notes; check console for details.");
+        setOutput("#flue-notes", "");
+        setDebug(state, { error: error.message });
+      }
+    }
+
+    window.generateDepotNotes = generateDepotNotes;
   </script>
 </body>
 </html>
