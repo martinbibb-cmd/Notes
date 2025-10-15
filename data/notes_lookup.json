@@ -71,3 +71,35 @@
     }
   }
 }
+  ,
+  "system_characteristics": {
+    "regular_to_combi": [
+      "System will be converted from open vent to sealed. Remove feed and expansion tanks and cap redundant pipework.",
+      "Mains pressure hot water will replace gravity supply. Check compatibility of showers and taps.",
+      "Any existing shower pumps will be removed as they are not suitable for pressurised systems."
+    ],
+    "regular_to_system": [
+      "System will be converted from open vent to sealed. Ensure pressure relief and expansion vessel installed.",
+      "Feed and expansion tanks will be removed from loft."
+    ],
+    "system_to_combi": [
+      "System remains sealed; however, hot water will now be mains pressure. Confirm shower and tap suitability.",
+      "Remove any hot water pumps no longer required."
+    ],
+    "combi_to_system": [
+      "Reverts from instantaneous DHW to stored cylinder. Confirm space and discharge pipework available.",
+      "System remains sealed; expansion vessel to be sized for total volume."
+    ],
+    "combi_to_regular": [
+      "System will revert to open vented. Feed and expansion tanks required.",
+      "Ensure correct venting and safety discharge routes reinstated."
+    ],
+    "system_to_unvented": [
+      "System remains sealed. Ensure G3 certification for unvented installation.",
+      "Hot water pressure increased; verify outlet compatibility and shower suitability."
+    ],
+    "regular_to_unvented": [
+      "Conversion from open vent to unvented sealed system. Remove tanks and install expansion control.",
+      "Hot water pressure increased; pumps will be redundant and may require removal."
+    ]
+  }
