@@ -36,12 +36,9 @@ const baseRules = {
 test("collects unique notes from matching transitions", () => {
   const result = evalTransitions(
     {
-      fromBoiler: "regular",
-      toBoiler: "system",
-      fromCylinder: "vented",
-      toCylinder: "none",
-      fromFlue: "balanced",
-      toFlue: "plume",
+      boiler: { from: "regular", to: "system" },
+      cylinder: { from: "vented", to: "none" },
+      flue: { from: "balanced", to: "plume" },
       flags: { plumeKit: true, hasPump: true }
     },
     baseRules,
@@ -49,22 +46,17 @@ test("collects unique notes from matching transitions", () => {
   );
 
   assert.deepStrictEqual(result, {
-    boilerNotes: [],
-    flueNotes: ["Flue note base", "Flue override"],
-    systemNewNotes: ["System note 1", "System note 2", "Context flag note"],
-    pipeNotes: []
+    systemNew: ["System note 1", "System note 2", "Context flag note"],
+    flue: ["Flue note base", "Flue override"]
   });
 });
 
 test("ignores unknown keys and inactive flags", () => {
   const result = evalTransitions(
     {
-      fromBoiler: "system",
-      toBoiler: "combi",
-      fromCylinder: "unvented",
-      toCylinder: "heatstore",
-      fromFlue: "vertical",
-      toFlue: "vertical",
+      boiler: { from: "system", to: "combi" },
+      cylinder: { from: "unvented", to: "heatstore" },
+      flue: { from: "vertical", to: "vertical" },
       flags: { plumeKit: false }
     },
     baseRules,
@@ -72,22 +64,17 @@ test("ignores unknown keys and inactive flags", () => {
   );
 
   assert.deepStrictEqual(result, {
-    boilerNotes: [],
-    flueNotes: [],
-    systemNewNotes: [],
-    pipeNotes: []
+    systemNew: [],
+    flue: []
   });
 });
 
 test("handles missing rule groups gracefully", () => {
   const result = evalTransitions(
     {
-      fromBoiler: "regular",
-      toBoiler: "system",
-      fromCylinder: "vented",
-      toCylinder: "none",
-      fromFlue: "balanced",
-      toFlue: "plume",
+      boiler: { from: "regular", to: "system" },
+      cylinder: { from: "vented", to: "none" },
+      flue: { from: "balanced", to: "plume" },
       flags: { plumeKit: true }
     },
     {},
@@ -95,9 +82,7 @@ test("handles missing rule groups gracefully", () => {
   );
 
   assert.deepStrictEqual(result, {
-    boilerNotes: [],
-    flueNotes: [],
-    systemNewNotes: [],
-    pipeNotes: []
+    systemNew: [],
+    flue: []
   });
 });
