@@ -9,3 +9,12 @@ python -m http.server 8000
 ```
 
 Then visit <http://localhost:8000/> and open `index.html`.
+
+## Utility tests
+
+Some helper logic is covered by Node's built-in test runner. To execute the
+suite run:
+
+```bash
+npm test
+```
