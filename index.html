@@ -1,472 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>System Transition Matrix</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boiler Mapper</title>
   <style>
     :root {
-      color-scheme: light dark;
-      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-      --bg: #0b0d10;
-      --panel: rgba(20, 25, 32, 0.92);
-      --border: rgba(255, 255, 255, 0.08);
-      --ink: #f2f5f9;
-      --muted: #9fb0c2;
-      --accent: #4aa3ff;
-      --shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+      color-scheme: dark;
     }
-
     * {
       box-sizing: border-box;
     }
-
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, rgba(74, 163, 255, 0.12), transparent 60%), var(--bg);
-      color: var(--ink);
+      background: #0b0d10;
+      color: #e9eef5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 20px;
       display: flex;
-      justify-content: center;
-      padding: 48px 16px 96px;
+      flex-direction: column;
+      gap: 20px;
     }
-
-    main {
-      width: min(1080px, 100%);
-      display: grid;
-      gap: 24px;
-    }
-
-    header {
-      text-align: center;
-      padding: 24px;
-      border-radius: 20px;
-      background: rgba(20, 25, 32, 0.88);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      box-shadow: var(--shadow);
-    }
-
     h1 {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 4vw, 2.6rem);
-      letter-spacing: 0.4px;
-    }
-
-    .lead {
       margin: 0;
-      color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.6;
+      font-size: clamp(1.8rem, 2.5vw, 2.6rem);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
-
-    section {
-      background: var(--panel);
-      border-radius: 18px;
-      padding: 24px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      display: grid;
-      gap: 20px;
+    fieldset {
+      border: 1px solid #2a323c;
+      padding: 14px;
+      margin: 0;
+      border-radius: 10px;
+      min-width: 260px;
+      flex: 1 1 280px;
+      background: rgba(18, 23, 28, 0.6);
     }
-
-    .grid {
-      display: grid;
-      gap: 20px;
+    legend {
+      padding: 0 6px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-
-    @media (min-width: 900px) {
-      .grid.two {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      .grid.three {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
     label {
-      display: grid;
-      gap: 8px;
-      font-size: 0.95rem;
-      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-
     select,
+    button,
     textarea {
-      background: rgba(9, 12, 16, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 12px;
-      font: inherit;
-      color: var(--ink);
-    }
-
-    select:focus,
-    textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(74, 163, 255, 0.25);
-    }
-
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-      font-weight: 600;
-      line-height: 1.4;
-    }
-
-    .flag-group {
-      display: grid;
-      gap: 12px;
-    }
-
-    .flag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .flag input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--accent);
-    }
-
-    .flag-columns {
-      display: grid;
-      gap: 16px;
-    }
-
-    @media (min-width: 900px) {
-      .flag-columns {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
-    .note-wrap {
-      display: grid;
-      gap: 12px;
-    }
-
-    .copy-btn {
-      padding: 6px 12px;
+      margin: 5px 0 12px;
+      padding: 8px 10px;
       border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(74, 163, 255, 0.18);
-      color: var(--ink);
-      cursor: pointer;
-      font-weight: 600;
+      border: 1px solid #2a323c;
+      background: #151a1f;
+      color: #e9eef5;
+      font-size: 0.95rem;
+      width: 100%;
     }
-
-    .results-grid {
+    select:focus,
+    button:focus,
+    textarea:focus {
+      outline: 2px solid #3d6cf3;
+      outline-offset: 2px;
+    }
+    button {
+      width: auto;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #1f2630;
+      cursor: pointer;
+    }
+    button.copy {
+      padding: 6px 12px;
+      font-size: 0.75rem;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    .sections {
       display: grid;
       gap: 18px;
     }
-
-    @media (min-width: 900px) {
-      .results-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    @media (min-width: 800px) {
+      .sections {
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       }
     }
-
-    h2 {
-      margin: 0;
-      font-size: 1.3rem;
+    .section {
+      background: rgba(18, 23, 28, 0.6);
+      border: 1px solid #2a323c;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 220px;
     }
-
-    h3 {
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       margin: 0;
-      font-size: 1.1rem;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .section textarea {
+      margin: 0;
+    }
+    .foot-actions {
+      display: flex;
+      justify-content: flex-end;
     }
   </style>
 </head>
 <body>
-  <main>
-    <header>
-      <h1>System Transition Matrix</h1>
-      <p class="lead">Set the existing and proposed kit, tick any on-site flags, then copy the tightened depot notes.</p>
-    </header>
+  <h1>Boiler Mapper</h1>
+  <div class="grid">
+    <fieldset>
+      <legend>Current System (A)</legend>
+      <label for="BlrA">Boiler Type
+        <select id="BlrA">
+          <option value="REGULAR">REGULAR</option>
+          <option value="SYSTEM">SYSTEM</option>
+          <option value="COMBI">COMBI</option>
+          <option value="BBU">BBU</option>
+          <option value="WARM_AIR">WARM_AIR</option>
+          <option value="ELECTRIC_WET">ELECTRIC_WET</option>
+        </select>
+      </label>
+      <label for="FluA">Flue Type
+        <select id="FluA">
+          <option value="HORIZONTAL">HORIZONTAL</option>
+          <option value="VERTICAL">VERTICAL</option>
+          <option value="PLUME_KIT">PLUME_KIT</option>
+          <option value="CHIMNEY">CHIMNEY</option>
+        </select>
+      </label>
+      <label for="CylA">Cylinder
+        <select id="CylA">
+          <option value="NONE">NONE</option>
+          <option value="VENTED_TANKED">VENTED_TANKED</option>
+          <option value="UNVENTED_MAINS">UNVENTED_MAINS</option>
+          <option value="THERMAL_STORE">THERMAL_STORE</option>
+          <option value="FORTIC_COMBINED">FORTIC_COMBINED</option>
+          <option value="PRIMATIC">PRIMATIC</option>
+        </select>
+      </label>
+      <label for="LocA">Location
+        <select id="LocA">
+          <option value="KITCHEN">KITCHEN</option>
+          <option value="GARAGE">GARAGE</option>
+          <option value="UTILITY">UTILITY</option>
+          <option value="AIRING_CUPBOARD">AIRING_CUPBOARD</option>
+          <option value="LOFT">LOFT</option>
+        </select>
+      </label>
+    </fieldset>
 
-    <section>
-      <div class="grid two">
-        <div>
-          <h2>Boiler</h2>
-          <label>
-            <span>Current boiler</span>
-            <select id="boiler-from">
-              <option value="regular">Regular</option>
-              <option value="system">System</option>
-              <option value="combi">Combi</option>
-              <option value="warm_air">Warm air</option>
-              <option value="none">None</option>
-            </select>
-          </label>
-          <label>
-            <span>Proposed boiler</span>
-            <select id="boiler-to">
-              <option value="regular">Regular</option>
-              <option value="system">System</option>
-              <option value="combi">Combi</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <h2>Cylinder</h2>
-          <label>
-            <span>Current cylinder</span>
-            <select id="cyl-from">
-              <option value="vented">Vented</option>
-              <option value="unvented">Unvented</option>
-              <option value="none">None</option>
-            </select>
-          </label>
-          <label>
-            <span>Proposed cylinder</span>
-            <select id="cyl-to">
-              <option value="vented">Vented</option>
-              <option value="unvented">Unvented</option>
-              <option value="none">None</option>
-            </select>
-          </label>
-        </div>
-      </div>
-      <div class="grid two">
-        <div>
-          <h2>Flue</h2>
-          <label>
-            <span>Current flue</span>
-            <select id="flue-from">
-              <option value="balanced">Balanced</option>
-              <option value="horizontal">Horizontal</option>
-              <option value="open">Open</option>
-              <option value="any">Any</option>
-            </select>
-          </label>
-          <label>
-            <span>Proposed flue</span>
-            <select id="flue-to">
-              <option value="fanned_horizontal">Fanned horizontal</option>
-              <option value="fanned_vertical">Fanned vertical</option>
-            </select>
-          </label>
-        </div>
-        <div>
-          <h2>Quick flags</h2>
-          <div class="flag-group">
-            <label class="flag"><input type="checkbox" id="flag-plume" />Plume kit required</label>
-            <label class="flag"><input type="checkbox" id="flag-noplume" />Plume kit not required</label>
-            <label class="flag"><input type="checkbox" id="flag-pump" />Shower pump present</label>
-          </div>
-        </div>
-      </div>
-    </section>
+    <fieldset>
+      <legend>Proposed System (B)</legend>
+      <label for="BlrB">Boiler Type
+        <select id="BlrB">
+          <option value="REGULAR">REGULAR</option>
+          <option value="SYSTEM">SYSTEM</option>
+          <option value="COMBI">COMBI</option>
+          <option value="ELECTRIC_WET">ELECTRIC_WET</option>
+        </select>
+      </label>
+      <label for="FluB">Flue Type
+        <select id="FluB">
+          <option value="HORIZONTAL">HORIZONTAL</option>
+          <option value="VERTICAL">VERTICAL</option>
+          <option value="PLUME_KIT">PLUME_KIT</option>
+          <option value="CHIMNEY">CHIMNEY</option>
+        </select>
+      </label>
+      <label for="CylB">Cylinder
+        <select id="CylB">
+          <option value="NONE">NONE</option>
+          <option value="VENTED_TANKED">VENTED_TANKED</option>
+          <option value="UNVENTED_MAINS">UNVENTED_MAINS</option>
+          <option value="THERMAL_STORE">THERMAL_STORE</option>
+        </select>
+      </label>
+      <label for="LocB">Location
+        <select id="LocB">
+          <option value="KITCHEN">KITCHEN</option>
+          <option value="GARAGE">GARAGE</option>
+          <option value="UTILITY">UTILITY</option>
+          <option value="AIRING_CUPBOARD">AIRING_CUPBOARD</option>
+          <option value="LOFT">LOFT</option>
+        </select>
+      </label>
+    </fieldset>
+  </div>
 
-    <section>
-      <h2>Site & install flags</h2>
-      <div class="flag-columns">
-        <div>
-          <h3>Needs</h3>
-          <label class="flag"><input type="checkbox" id="f-low-pressure" />Low mains pressure</label>
-          <label class="flag"><input type="checkbox" id="f-slow-dhw" />Slow hot water to distant outlets</label>
-          <label class="flag"><input type="checkbox" id="f-need-space" />Need to free up space</label>
-          <label class="flag"><input type="checkbox" id="f-low-costs" />Reduce running costs</label>
-          <label class="flag"><input type="checkbox" id="f-simple-controls" />Prefers simple controls</label>
-          <label class="flag"><input type="checkbox" id="f-quiet" />Noise sensitive</label>
-          <label class="flag"><input type="checkbox" id="f-future" />Future-ready option wanted</label>
-        </div>
-        <div>
-          <h3>Access & heights</h3>
-          <label class="flag"><input type="checkbox" id="f-loft" />Boiler in loft</label>
-          <label class="flag"><input type="checkbox" id="f-loft-unboarded" />Loft unboarded</label>
-          <label class="flag"><input type="checkbox" id="f-flat-roof" />Flat roof work</label>
-          <label class="flag"><input type="checkbox" id="f-high-reach" />Two storeys / >45° roof</label>
-          <label class="flag"><input type="checkbox" id="f-scf-std" />Scaffold – standard tower</label>
-          <label class="flag"><input type="checkbox" id="f-scf-bridge" />Scaffold – bridging</label>
-          <label class="flag"><input type="checkbox" id="f-scf-cant" />Scaffold – cantilever</label>
-        </div>
-        <div>
-          <h3>System notes</h3>
-          <label class="flag"><input type="checkbox" id="f-microbore" />Microbore pipework</label>
-          <label class="flag"><input type="checkbox" id="f-one-pipe" />One-pipe circuit</label>
-          <label class="flag"><input type="checkbox" id="f-galv" />Galv/steel pipework</label>
-        </div>
-        <div>
-          <h3>Cylinder & tanks</h3>
-          <label class="flag"><input type="checkbox" id="f-cyl-remove" />Remove existing cylinder</label>
-          <label class="flag"><input type="checkbox" id="f-cyl-replace" />Replace cylinder</label>
-          <label class="flag"><input type="checkbox" id="f-cws-remove" />Remove cold water storage</label>
-          <label class="flag"><input type="checkbox" id="f-two-person" />Two-person lift</label>
-        </div>
-        <div>
-          <h3>Restrictions</h3>
-          <label class="flag"><input type="checkbox" id="f-no-loft" />No loft access</label>
-          <label class="flag"><input type="checkbox" id="f-tight" />Restricted clearance</label>
-          <label class="flag"><input type="checkbox" id="f-permit" />Permit parking</label>
-          <label class="flag"><input type="checkbox" id="f-hours" />Restricted working hours</label>
-          <label class="flag"><input type="checkbox" id="f-vulnerable" />Vulnerable occupant</label>
-          <label class="flag"><input type="checkbox" id="f-septic" />Septic tank on site</label>
-          <label class="flag"><input type="checkbox" id="f-listed" />Listed building</label>
-          <label class="flag"><input type="checkbox" id="f-leasehold" />Flat management permission</label>
-        </div>
-        <div>
-          <h3>Hazards</h3>
-          <label class="flag"><input type="checkbox" id="f-asbestos" />Asbestos suspected</label>
-          <label class="flag"><input type="checkbox" id="f-fragile-roof" />Fragile roof</label>
-          <label class="flag"><input type="checkbox" id="f-flood" />Flood risk</label>
-          <label class="flag"><input type="checkbox" id="f-wasps" />Wasps present</label>
-          <label class="flag"><input type="checkbox" id="f-bees" />Bees present</label>
-          <label class="flag"><input type="checkbox" id="f-no-light" />No lighting</label>
-          <label class="flag"><input type="checkbox" id="f-pet-mess" />Pet mess</label>
-          <label class="flag"><input type="checkbox" id="f-dogs" />Dogs on site</label>
-          <label class="flag"><input type="checkbox" id="f-oh-cables" />Overhead cables</label>
-        </div>
-        <div>
-          <h3>Delivery & office</h3>
-          <label class="flag"><input type="checkbox" id="f-am" />Prefer AM delivery</label>
-          <label class="flag"><input type="checkbox" id="f-pm" />Prefer PM delivery</label>
-          <label class="flag"><input type="checkbox" id="f-lg-ok" />Large vehicle ok</label>
-          <label class="flag"><input type="checkbox" id="f-lg-nok" />Large vehicle restricted</label>
-          <label class="flag"><input type="checkbox" id="f-del-garage" />Deliver to garage</label>
-          <label class="flag"><input type="checkbox" id="f-del-inside" />Deliver inside</label>
-          <label class="flag"><input type="checkbox" id="f-call" />Call ahead</label>
-          <label class="flag"><input type="checkbox" id="f-direct-labour" />Direct labour</label>
-          <label class="flag"><input type="checkbox" id="f-office-asb" />Arrange asbestos removal</label>
-          <label class="flag"><input type="checkbox" id="f-office-builder" />Specialist builder needed</label>
-          <label class="flag"><input type="checkbox" id="f-office-scf" />Scaffold via office</label>
-        </div>
-        <div>
-          <h3>Flue specifics</h3>
-          <label class="flag"><input type="checkbox" id="f-flue-same-hole" />Use same hole (minor adjust)</label>
-          <label class="flag"><input type="checkbox" id="f-flue-new-same" />New hole same wall</label>
-          <label class="flag"><input type="checkbox" id="f-flue-new-alt" />New hole alternate wall</label>
-          <label class="flag"><input type="checkbox" id="f-terminal-guard" />Terminal guard required</label>
-          <label class="flag"><input type="checkbox" id="f-boundary-close" />Close to boundary</label>
-        </div>
-        <div>
-          <h3>Pipework & treatment</h3>
-          <label class="flag"><input type="checkbox" id="f-gas-22" />Upgrade gas to 22 mm</label>
-          <label class="flag"><input type="checkbox" id="f-gas-long" />Long run capacity</label>
-          <label class="flag"><input type="checkbox" id="f-cond-trap" />Add internal trap</label>
-          <label class="flag"><input type="checkbox" id="f-cond-external" />External condensate run</label>
-          <label class="flag"><input type="checkbox" id="f-cond-pump" />Condensate pump</label>
-          <label class="flag"><input type="checkbox" id="f-cond-neutraliser" />Condensate neutraliser</label>
-          <label class="flag"><input type="checkbox" id="f-mains-boost" />Increase mains flow</label>
-          <label class="flag"><input type="checkbox" id="f-scale-filter" />Scale filter</label>
-          <label class="flag"><input type="checkbox" id="f-tundish" />Visible discharge tundish</label>
-          <label class="flag"><input type="checkbox" id="f-powerflush" />Powerflush</label>
-          <label class="flag"><input type="checkbox" id="f-chemclean" />Chemical clean</label>
-          <label class="flag"><input type="checkbox" id="f-magfilter" />Magnetic filter</label>
-        </div>
-        <div>
-          <h3>Heating</h3>
-          <label class="flag"><input type="checkbox" id="f-rads-replace" />Replace radiators</label>
-          <label class="flag"><input type="checkbox" id="f-trvs" />Fit TRVs</label>
-          <label class="flag"><input type="checkbox" id="f-balance" />Balance on completion</label>
-        </div>
-        <div>
-          <h3>Customer actions</h3>
-          <label class="flag"><input type="checkbox" id="f-clear" />Customer to clear work areas</label>
-          <label class="flag"><input type="checkbox" id="f-permissions" />Gain permissions</label>
-          <label class="flag"><input type="checkbox" id="f-pets" />Pets present</label>
-          <label class="flag"><input type="checkbox" id="f-cust-remove-cb" />Customer to remove cupboard</label>
-          <label class="flag"><input type="checkbox" id="f-cust-rebuild-cb" />Customer to rebuild cupboard</label>
-          <label class="flag"><input type="checkbox" id="f-cust-supply" />Customer supplying items</label>
-        </div>
-        <div>
-          <h3>Locations & controls</h3>
-          <label class="flag"><input type="checkbox" id="f-loc-kitchen" />Boiler in kitchen</label>
-          <label class="flag"><input type="checkbox" id="f-loc-kitchen-cup" />Kitchen cupboard install</label>
-          <label class="flag"><input type="checkbox" id="f-loc-utility" />Utility location</label>
-          <label class="flag"><input type="checkbox" id="f-loc-loft" />Loft location</label>
-          <label class="flag"><input type="checkbox" id="f-loc-garage" />Garage location</label>
-          <label class="flag"><input type="checkbox" id="f-loc-airing" />Airing cupboard location</label>
-          <label class="flag"><input type="checkbox" id="f-ctrl-hive" />Hive controls</label>
-          <label class="flag"><input type="checkbox" id="f-ctrl-hive-mini" />Hive Mini controls</label>
-          <label class="flag"><input type="checkbox" id="f-ctrl-prog-stat" />Programmable stat</label>
-          <label class="flag"><input type="checkbox" id="f-ctrl-wireless" />Wireless room stat</label>
-        </div>
-      </div>
-    </section>
+  <div class="actions">
+    <button id="generate">Generate Notes</button>
+  </div>
 
-    <section>
-      <h2>Depot outputs</h2>
-      <div class="results-grid">
-        <div class="note-wrap">
-          <label>Boiler and controls<textarea id="boiler-notes" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#boiler-notes').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Flue<textarea id="flue-notes" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#flue-notes').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>System characteristics (new)<textarea id="system-new-notes" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#system-new-notes').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Needs<textarea id="needs-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#needs-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Working at heights<textarea id="wah-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#wah-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Arse cover notes<textarea id="ars-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#ars-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Components that require assistance<textarea id="assist-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#assist-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Restrictions to work<textarea id="restrictions-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#restrictions-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>External hazards<textarea id="hazards-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#hazards-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Delivery notes<textarea id="delivery-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#delivery-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Office notes<textarea id="office-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#office-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Boiler and controls (summary)<textarea id="bc-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#bc-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Flue (extra)<textarea id="flue-extra-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#flue-extra-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Pipework<textarea id="pipe-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#pipe-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Disruption / Cleaning / Filtration<textarea id="disruption-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#disruption-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Radiators<textarea id="rads-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#rads-out').value)">Copy</button>
-        </div>
-        <div class="note-wrap">
-          <label>Customer actions<textarea id="customer-out" readonly></textarea></label>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(document.querySelector('#customer-out').value)">Copy</button>
-        </div>
+  <div class="sections" id="sections">
+    <div class="section" data-section="SummaryChange">
+      <div class="section-header">
+        <h2>SummaryChange</h2>
+        <button class="copy" data-copy="SummaryChange">Copy</button>
       </div>
-    </section>
-  </main>
+      <textarea id="SummaryChange" rows="6" placeholder="↘️ Summary lines will appear here;"></textarea>
+    </div>
+    <div class="section" data-section="SystemChanges">
+      <div class="section-header">
+        <h2>SystemChanges</h2>
+        <button class="copy" data-copy="SystemChanges">Copy</button>
+      </div>
+      <textarea id="SystemChanges" rows="6" placeholder="↘️ System change notes;"></textarea>
+    </div>
+    <div class="section" data-section="HotWater">
+      <div class="section-header">
+        <h2>HotWater</h2>
+        <button class="copy" data-copy="HotWater">Copy</button>
+      </div>
+      <textarea id="HotWater" rows="6" placeholder="↘️ Hot water notes;"></textarea>
+    </div>
+    <div class="section" data-section="Flue">
+      <div class="section-header">
+        <h2>Flue</h2>
+        <button class="copy" data-copy="Flue">Copy</button>
+      </div>
+      <textarea id="Flue" rows="4" placeholder="↘️ Flue notes;"></textarea>
+    </div>
+    <div class="section" data-section="Gas">
+      <div class="section-header">
+        <h2>Gas</h2>
+        <button class="copy" data-copy="Gas">Copy</button>
+      </div>
+      <textarea id="Gas" rows="4" placeholder="↘️ Gas notes;"></textarea>
+    </div>
+    <div class="section" data-section="Condensate">
+      <div class="section-header">
+        <h2>Condensate</h2>
+        <button class="copy" data-copy="Condensate">Copy</button>
+      </div>
+      <textarea id="Condensate" rows="4" placeholder="↘️ Condensate notes;"></textarea>
+    </div>
+    <div class="section" data-section="LocationAndMakingGood">
+      <div class="section-header">
+        <h2>LocationAndMakingGood</h2>
+        <button class="copy" data-copy="LocationAndMakingGood">Copy</button>
+      </div>
+      <textarea id="LocationAndMakingGood" rows="6" placeholder="↘️ Location / making good notes;"></textarea>
+    </div>
+    <div class="section" data-section="Controls">
+      <div class="section-header">
+        <h2>Controls</h2>
+        <button class="copy" data-copy="Controls">Copy</button>
+      </div>
+      <textarea id="Controls" rows="4" placeholder="↘️ Controls notes;"></textarea>
+    </div>
+    <div class="section" data-section="HouseKeeping">
+      <div class="section-header">
+        <h2>HouseKeeping</h2>
+        <button class="copy" data-copy="HouseKeeping">Copy</button>
+      </div>
+      <textarea id="HouseKeeping" rows="4" placeholder="↘️ House keeping notes;"></textarea>
+    </div>
+  </div>
 
-  <script src="script.js" type="module"></script>
+  <div class="foot-actions">
+    <button id="copy-all">Copy All Sections</button>
+  </div>
+
+  <script>
+    const logic = {
+      notes: {
+        remove_cylinder: "↘️ Remove existing hot-water cylinder and associated components;",
+        space_gain: "↘️ Space reclaimed from cylinder/loft tanks — confirm preferred use;",
+        remove_FandE: "↘️ Remove F&E tanks and convert to sealed system where applicable;",
+        cold_main_check: "↘️ Verify incoming cold main flow/pressure meets combi/unvented requirements; upgrade if inadequate;",
+        customer_expectations_combi: "↘️ Combi hot-water performance depends on mains flow; simultaneous draws reduce flow/temperature;",
+        unvented_requirements: "↘️ Provide unvented G3 safety set, correctly sized discharge (D2) and termination; confirm main capacity;",
+        customer_expectations_unvented: "↘️ Unvented cylinder provides mains-pressure hot water at multiple outlets (subject to main capacity);",
+        cylinder_relocation: "↘️ New cylinder location — allow primary/secondary runs and compliant discharge path;",
+        gas_supply_check: "↘️ Confirm gas pipe sizing and route for new input rating; upgrade if required;",
+        condensate_route: "↘️ Confirm compliant condensate route and termination;",
+        flue_clearances: "↘️ Check flue type/route/terminal clearances vs MI; confirm guards, plume management if needed;",
+        system_cleanse: "↘️ Cleanse system and dose inhibitor; fit system filter as specified;",
+        trvs_balancing: "↘️ Fit/verify TRVs where required and balance system on completion;"
+      },
+      rules: [
+        { when: f => f.B_isCombi && f.A_hasCylinder, add: ["remove_cylinder", "space_gain"] },
+        { when: f => f.B_isCombi, add: ["cold_main_check", "customer_expectations_combi"] },
+        { when: f => f.B_isSystem && f.CylB === "UNVENTED_MAINS", add: ["unvented_requirements", "customer_expectations_unvented"] },
+        { when: f => f.B_needsCylinder && f.Loc_change, add: ["cylinder_relocation"] },
+        { when: f => f.A_isVented && (f.B_isCombi || (f.B_isSystem && f.CylB !== "VENTED_TANKED")), add: ["remove_FandE"] },
+        { when: f => f.Flu_change, add: ["flue_clearances"] },
+        { when: f => true, add: ["gas_supply_check", "condensate_route", "system_cleanse", "trvs_balancing"] }
+      ]
+    };
+
+    const noteSections = {
+      remove_cylinder: "HotWater",
+      space_gain: "LocationAndMakingGood",
+      remove_FandE: "SystemChanges",
+      cold_main_check: "HotWater",
+      customer_expectations_combi: "HotWater",
+      unvented_requirements: "HotWater",
+      customer_expectations_unvented: "HotWater",
+      cylinder_relocation: "LocationAndMakingGood",
+      gas_supply_check: "Gas",
+      condensate_route: "Condensate",
+      flue_clearances: "Flue",
+      system_cleanse: "SystemChanges",
+      trvs_balancing: "SystemChanges"
+    };
+
+    const sectionOrder = [
+      "SummaryChange",
+      "SystemChanges",
+      "HotWater",
+      "Flue",
+      "Gas",
+      "Condensate",
+      "LocationAndMakingGood",
+      "Controls",
+      "HouseKeeping"
+    ];
+
+    function deriveFlags(i) {
+      return {
+        A_hasCylinder: i.CylA !== "NONE",
+        A_isVented: ["VENTED_TANKED", "FORTIC_COMBINED", "PRIMATIC"].includes(i.CylA),
+        B_isCombi: i.BlrB === "COMBI",
+        B_isSystem: i.BlrB === "SYSTEM",
+        B_needsCylinder: ["SYSTEM", "REGULAR"].includes(i.BlrB) && i.CylB !== "NONE",
+        Flu_change: i.FluA !== i.FluB,
+        Loc_change: i.LocA !== i.LocB
+      };
+    }
+
+    function buildNoteKeys(input) {
+      const flags = deriveFlags(input);
+      const active = [];
+      for (const rule of logic.rules) {
+        if (rule.when(flags)) {
+          active.push(...rule.add);
+        }
+      }
+      return [...new Set(active)];
+    }
+
+    function formatLine(text) {
+      return text.startsWith("↘️") ? text : `↘️ ${text.replace(/;?$/, ';')}`;
+    }
+
+    function generateSections(input) {
+      const keys = buildNoteKeys(input);
+      const sections = Object.fromEntries(sectionOrder.map(id => [id, []]));
+
+      const title = input.BlrA === input.BlrB ? "Like for like" : `Change from ${input.BlrA} to ${input.BlrB}`;
+      const summaryLines = [
+        formatLine(`${title};`)
+      ];
+      const locationLine = input.LocA === input.LocB
+        ? `↘️ Boiler location unchanged (${input.LocA});`
+        : `↘️ Relocate boiler from ${input.LocA} to ${input.LocB};`;
+      summaryLines.push(locationLine);
+      const flueLine = input.FluA === input.FluB
+        ? `↘️ Flue arrangement retained (${input.FluB});`
+        : `↘️ Adapt flue from ${input.FluA} to ${input.FluB};`;
+      summaryLines.push(flueLine);
+      sections.SummaryChange.push(...summaryLines);
+
+      for (const key of keys) {
+        const section = noteSections[key] || "SystemChanges";
+        sections[section].push(logic.notes[key]);
+      }
+
+      if (sections.Controls.length === 0) {
+        sections.Controls.push("↘️ Confirm controls specification and zoning with client;");
+      }
+      if (sections.HouseKeeping.length === 0) {
+        sections.HouseKeeping.push("↘️ Leave working area clean, remove waste and provide handover pack;");
+      }
+
+      if (sections.LocationAndMakingGood.length === 0) {
+        sections.LocationAndMakingGood.push(locationLine);
+      } else if (!sections.LocationAndMakingGood.includes(locationLine)) {
+        sections.LocationAndMakingGood.unshift(locationLine);
+      }
+
+      return sections;
+    }
+
+    async function copyText(text) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          throw new Error('Clipboard API unavailable');
+        }
+      } catch (err) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+    }
+
+    function populateSections(sections) {
+      for (const id of sectionOrder) {
+        const textarea = document.getElementById(id);
+        if (!textarea) continue;
+        textarea.value = sections[id].join('\n');
+      }
+    }
+
+    function collectInput() {
+      const get = id => document.getElementById(id).value;
+      return {
+        BlrA: get('BlrA'),
+        FluA: get('FluA'),
+        CylA: get('CylA'),
+        LocA: get('LocA'),
+        BlrB: get('BlrB'),
+        FluB: get('FluB'),
+        CylB: get('CylB'),
+        LocB: get('LocB')
+      };
+    }
+
+    document.getElementById('generate').addEventListener('click', () => {
+      const input = collectInput();
+      const sections = generateSections(input);
+      populateSections(sections);
+    });
+
+    document.querySelectorAll('button.copy').forEach(btn => {
+      btn.addEventListener('click', async event => {
+        const id = event.currentTarget.dataset.copy;
+        const textarea = document.getElementById(id);
+        if (textarea) {
+          await copyText(textarea.value);
+          event.currentTarget.textContent = 'Copied!';
+          setTimeout(() => {
+            event.currentTarget.textContent = 'Copy';
+          }, 1500);
+        }
+      });
+    });
+
+    document.getElementById('copy-all').addEventListener('click', async () => {
+      const combined = sectionOrder
+        .map(id => {
+          const textarea = document.getElementById(id);
+          return `${id}:\n${textarea ? textarea.value : ''}`;
+        })
+        .join('\n\n');
+      await copyText(combined.trim());
+      const button = document.getElementById('copy-all');
+      button.textContent = 'Copied All!';
+      setTimeout(() => {
+        button.textContent = 'Copy All Sections';
+      }, 1500);
+    });
+
+    populateSections(generateSections(collectInput()));
+  </script>
 </body>
 </html>
