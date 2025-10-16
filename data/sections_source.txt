@@ -1,0 +1,234 @@
+[Needs]
+NE01 | Need | Better water pressure
+NE02 | Need | Faster hot water delivery
+NE03 | Need | More usable space
+NE04 | Need | Lower running costs
+NE05 | Need | Easier controls
+NE06 | Need | Quieter operation
+NE07 | Need | Future-ready system
+
+[Working at heights]
+WAH01 | Access | Ladder access required
+WAH02A | Scaffold | Tower – standard
+WAH02B | Scaffold | Tower – bridging
+WAH02C | Scaffold | Cantilever
+WAH03 | Roof access | Permit required
+WAH04A | Loft access | Boarded
+WAH04B | Loft access | Unboarded
+WAH05 | Access | MEWP required
+WAH06 | Flat roof | Specialist builder to make good
+WAH50 | Ladder | 1:4 angle (≈75°) – ~250 mm out per metre rise; secure footing
+WAH51 | Reach | Max practical ladder reach ≈6 m; >2 storeys or >45° roof = scaffold
+WAH52 | Roof | Flat roof work requires edge protection or 2 m exclusion from edge
+WAH53 | Loft | Boiler weight ≤≈35 kg for safe loft handling; use two-person lift if needed
+WAH54 | Access | Fixed loft ladder and permanent lighting required for service access
+
+[System characteristics]
+SE00 | Existing system
+SE01 | System type | Regular (open-vented with F&E tank)
+SE02 | System type | Regular (sealed system kit present)
+SE03 | Hot water | System boiler – open-vented
+SE04 | Hot water | System boiler – unvented
+SE05 | Configuration | Y-plan (3-port valve)
+SE06 | Configuration | S-plan (2-port valves)
+SE07 | Configuration | Gravity primaries
+SE08 | Legacy install | Combi present
+SE09 | Pipework | Microbore
+SE10 | System pressure | Low
+SE11 | Controls | Mechanical timer / room stat
+SE12 | Controls | Hard-wired only
+SN00 | New boiler
+SN01 | System type | Combi boiler
+SN02 | System type | System boiler with unvented cylinder
+SN03 | System type | System boiler with Mixergy cylinder
+SN04 | System type | Regular boiler with open-vented hot water
+SN05 | System type | Regular boiler with unvented hot water
+SN06 | Heating circuit | Open-vented
+SN07 | Heating circuit | Sealed / pressurised
+SN08 | Heating zones | TRVs on all radiators
+SN09 | Heating zones | Additional zone(s) via 2-port valves
+SN10 | Heating zones | Existing Y-plan retained
+SN11 | Controls compatibility | Hive
+SN12 | Controls compatibility | Hive Mini
+SN13 | Controls preference | Simple / manual
+SC50 | System Type | Combi – instantaneous DHW; no tanks
+SC51 | System Type | System – sealed with cylinder; built-in pump/expansion vessel
+SC52 | System Type | Regular – open-vented with F&E tank
+SC53 | System Pressure | Sealed system may expose latent leaks – advise & record disclaimer
+SC54 | Pipework | 22 mm primaries typical; 28 mm if >24 kW or long runs/high resistance
+SC55 | Pipework | One-pipe system not suitable for modern boilers – recommend re-pipe
+SC56 | Pipework | Galvanised/steel pipework – replace rather than flush
+SC57 | Water Softeners | Worcester allows softened water through primary HX
+SC58 | Water Softeners | Vaillant/Ideal – bypass or hard-fill only (no softened water through HX)
+SC59 | Location | Loft installs require boarded area (≈1.5 m radius), fixed ladder & lighting
+SC60 | Condensate | External condensate must be insulated/frost-protected
+
+[Arse_cover_notes]
+ARS01 | System | Sealing an old system may expose hidden leaks
+ARS02 | System | Existing radiators and valves may leak once pressurised
+ARS03 | System | Old vented pipework and joints not designed for pressure
+ARS04 | System | System converted from open vent to sealed — PRV fitted for safety
+ARS05 | System | Early pressure drops may indicate existing weeps/hidden leaks
+ARS06 | System | Customer to monitor pressure during initial days of use
+ARS07 | System | No liability for existing weaknesses or pre-existing faults
+ARS08 | Combi | Combination boilers supply one outlet at a time — flow reduces with multiple use
+ARS09 | Combi | Flow rate limited by mains water supply
+ARS10 | Combi | Multiple bathrooms reduce performance
+ARS11 | Combi | Cold mains restrictions may affect shower performance
+ARS12 | Combi | Hot water temperature varies slightly with flow
+ARS13 | Combi | Not suitable for pumped showers — remove pump
+ARS14 | Combi | Shower performance depends on incoming cold main pressure/flow
+ARS15 | Hot water | Stored cylinder water reheats between draws
+ARS16 | Hot water | Unvented cylinders require periodic servicing
+ARS17 | Hot water | Unvented discharge tested at installation only
+ARS18 | Hot water | Recovery time depends on usage pattern
+ARS19 | Hot water | No liability for fixtures not designed for mains pressure
+ARS20 | Condensate | External route insulated to reduce freezing risk; not guaranteed
+ARS21 | Condensate | Soakaway where suitable drainage available
+ARS22 | Condensate | Customer to maintain clear, free-flowing route
+ARS23 | Condensate | No responsibility for freezing if MI compliant
+ARS24 | Controls | Installed per manufacturer’s instructions
+ARS25 | Controls | Hive works locally without Wi-Fi; app needs internet + USB power
+ARS26 | Controls | Smart controls may require network for app features
+ARS27 | Controls | Not responsible for internet/app issues
+ARS28 | Controls | Room stat location chosen by best judgement
+ARS29 | Flue | Clearances checked at install; future obstructions not covered
+ARS30 | Flue | Brickwork/render made good to reasonable standard
+ARS31 | Flue | Flashings/weatherproofing only — not decorative
+ARS32 | Flue | Redundant openings made safe/sealed where practical
+ARS33 | Access | Safe access for install only — permanent access is customer responsibility
+ARS34 | Access | Loft must be boarded/lit/safe before works
+ARS35 | Access | Working at height precautions may require scaffold/tower
+ARS36 | Access | No work above safe height without suitable equipment
+ARS37 | Customer | Customer to clear working area
+ARS38 | Customer | Pets to be contained during works
+ARS39 | Customer | Noise/dust/disruption unavoidable during install
+ARS40 | Customer | Water/heating may be temporarily unavailable
+ARS41 | Customer | Customer responsible for redecorating/boxing-in after completion
+ARS42 | General | Works to Gas Safe & Building Regs at time of install
+ARS43 | General | Manufacturer warranty subject to annual service
+ARS44 | General | No liability for pre-existing/unrelated plumbing issues
+ARS45 | General | Performance depends on design and existing pipework
+ARS46 | General | Recommendations based on visible inspection only
+
+[Components that require assistance]
+CS01 | Cylinder | Removal required
+CS02 | Cylinder | Replacement required
+CS03 | CWS tank | Removal required
+CS04 | Boiler | Two-person lift required
+CS05 | Radiators | Heavy radiators
+
+[Restrictions to work]
+SR01 | Access | No loft access
+SR02 | Clearance | Restricted clearance
+SR03 | Parking | Limited / permit required
+SR04 | Hours | Working hours restricted
+SR05 | Pets | On site
+SR06 | Occupant | Vulnerable person present
+SR07 | Noise | Restrictions in place
+SR08 | Drainage | Septic tank – not suitable for condensate
+SR09 | Building | Listed – consent required
+SR10 | Building | Listed – permission required
+SR11 | Property type | Flats – management permission required
+
+[External hazards]
+EH01 | Asbestos | Suspected
+EH02 | Roof | Fragile tiles / material
+EH03 | Environment | Flood risk / standing water
+EH04 | Insects | Wasps nesting
+EH05 | Insects | Bees nesting
+EH06 | Lighting | Poor / no power
+EH07 | Site | Pet mess present
+EH08 | Animals | Dog(s) present
+EH09 | Animals | Other potentially dangerous
+ASB50 | Asbestos | Visual check each visit; stop work if suspected ACM is damaged/friable
+ASB51 | Asbestos | Non-notifiable tasks only within limits
+ASB52 | Asbestos | Limited fixings only – record
+HAZ50 | Electrical | Overhead cables within 3 m – liaise with DNO
+HAZ51 | Site | Customer to clear working areas; protect fragile roofs/greenhouses
+
+[Delivery notes]
+DL01 | Slot | Preferred AM
+DL02 | Slot | Preferred PM
+DL03 | Access | Large vehicle suitable
+DL04 | Access | Large vehicle restricted
+DL05 | Delivery | To garage
+DL06 | Delivery | To room within property
+DL07 | Contact | Call ahead on arrival
+DL08 | Handling | Two-person lift
+DL09 | Handling | Stairs / no lift
+
+[Office notes]
+OA01 | Labour | Direct labour required
+OA02 | Specialist works | Asbestos removal
+OA03 | Specialist works | Specialist builder
+OA04 | Specialist works | Scaffolding
+OA05 | Assistance | Two-person required
+
+[New boiler and controls]
+BLC01 | Location | Kitchen – not in cupboard
+BLC02 | Location | Kitchen – within cupboard
+BLC04 | Location | Utility room
+BLC05 | Location | Loft
+BLC06 | Location | Garage
+BLC08 | Location | Airing cupboard
+BT01 | Boiler type | Regular
+BT02 | Boiler type | System
+BT03 | Boiler type | Combi
+UC01 | User control | Hive
+UC02 | User control | Hive Mini
+UC03 | User control | Programmable thermostat
+UC05 | User control | Wireless room stat
+
+[Flue]
+FMG01 | Make good | Old balanced flue
+FMG02 | Make good | Old fanned flue
+FMG03 | Make good | Old roof terminal
+FMG04 | Make good | Brick up old flue opening
+FN01 | New flue | Use same hole – minor change
+FN02 | New flue | New hole – same wall
+FN03 | New flue | New hole – alternative wall
+FN04 | Orientation | Horizontal
+FN05 | Orientation | Vertical
+FN09 | Add-on | Plume kit required
+FN10 | Add-on | Flue extension
+FN11 | Safety | Terminal guard required
+FLU50 | Min 300 mm from openings
+FLU52 | ≥600 mm to facing surface/boundary (nuisance pluming)
+FLU53 | Voids require inspection hatches
+
+[Pipe work]
+GR01 | Gas | Upgrade to 22 mm
+GR10 | Gas | Upsize sections for capacity
+GAS51 | Compliance | Max 1 mbar drop on new runs
+CD01 | Condensate | Internal waste – trap present
+CD02 | Condensate | Internal waste – add trap
+CD03 | Condensate | External run insulated (42 mm MI)
+CD05 | Condensate | Pump required
+CD11 | Condensate | Neutraliser fitted (where required)
+DS02 | Discharge | Tundish visible and compliant
+WS01 | Mains | Increase pressure/flow (PRV/accumulator as needed)
+WS04 | Filter | Scale filter required
+
+[Disruption / Cleaning / Filtration]
+PF01 | Powerflush required
+PF02 | Chemical clean and inhibit
+PF03 | Magnetic filter
+PF54 | Benefit | Improved circulation & efficiency
+CE50 | Combi DHW not truly “instant”
+CE51 | Flow depends on mains; demo with flow cup
+CE53 | Sealed system can expose weeps
+CE55 | External condensate needs insulation/trace
+
+[Radiators]
+RD01 | Replace radiator(s)
+RD03 | Fit TRVs / lockshields
+RD04 | Balance system on completion
+
+[Customer actions]
+CA01 | Clear working areas
+CA02 | Gain permission where required
+CA03 | Keep animals safe
+CA04 | Remove cupboard (if agreed)
+CA05 | Rebuild cupboard (if agreed)
+CA07 | Supply specified items

@@ -114,6 +114,16 @@
       line-height: 1.4;
     }
 
+    .copy-btn{
+      margin-top: 6px;
+      padding: 6px 10px;
+      border: 1px solid #2a3340;
+      border-radius: 6px;
+      background: #1a222c;
+      color: #e9eef5;
+      cursor: pointer;
+    }
+
     .flags {
       display: flex;
       flex-wrap: wrap;
@@ -138,6 +148,32 @@
       margin: 0 0 4px;
       font-size: 1.2rem;
       letter-spacing: 0.2px;
+    }
+
+    .notes-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 960px) {
+      .notes-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .note-panel {
+      background: rgba(12, 16, 22, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .note-panel h3 {
+      margin: 0;
+      font-size: 1.05rem;
     }
   </style>
 </head>
@@ -236,6 +272,24 @@
         <h2>System characteristics (new)</h2>
         <textarea id="system-new-notes" readonly></textarea>
       </div>
+    </section>
+
+    <section class="notes-grid">
+      <div class="note-panel" id="needs"></div>
+      <div class="note-panel" id="wah"></div>
+      <div class="note-panel" id="sc-old"></div>
+      <div class="note-panel" id="ars"></div>
+      <div class="note-panel" id="assist"></div>
+      <div class="note-panel" id="restrictions"></div>
+      <div class="note-panel" id="hazards"></div>
+      <div class="note-panel" id="delivery"></div>
+      <div class="note-panel" id="office"></div>
+      <div class="note-panel" id="boiler-controls"></div>
+      <div class="note-panel" id="flue-extra"></div>
+      <div class="note-panel" id="pipe"></div>
+      <div class="note-panel" id="disruption"></div>
+      <div class="note-panel" id="rads"></div>
+      <div class="note-panel" id="customer"></div>
     </section>
   </main>
 

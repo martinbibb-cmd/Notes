@@ -14,12 +14,8 @@
   },
   "flue_mappings": {
     "balanced_to_fanned": "Flu a3 b1a",
-    "balanced_to_fanned_horizontal": "Flu a3 b1a",
     "open_to_fanned":     "Flu a5 b1a",
-    "open_to_fanned_horizontal": "Flu a5 b1a",
     "horizontal_to_same": "Flu a1 b1a",
-    "horizontal_to_fanned_horizontal": "Flu a1 b1a",
-    "any_to_vertical":    "Flu aX b4",
-    "any_to_fanned_vertical": "Flu aX b4"
+    "any_to_vertical":    "Flu aX b4"
   }
 }
