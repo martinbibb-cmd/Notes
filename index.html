@@ -186,64 +186,110 @@ function flags(i){
   };
 }
 
-// ---- Rule engine: returns set of note keys per section
-function resolve(i){
-  const f = flags(i);
-  const out = {
-    SummaryChange: new Set(),
-    SystemChanges: new Set(),
-    HotWater: new Set(),
-    Flue: new Set(),
-    Gas: new Set(),
-    Condensate: new Set(),
-    LocationAndMakingGood: new Set(),
-    Controls: new Set(),
-    HouseKeeping: new Set()
-  };
+// ---- Decision rules
+const SECTION_KEYS = [
+  "SummaryChange","SystemChanges","HotWater","Flue",
+  "Gas","Condensate","LocationAndMakingGood","Controls","HouseKeeping"
+];
 
-  // Summary
-  const summary = (i.BlrA===i.BlrB && i.CylA===i.CylB)
-    ? "↘️ Like for like;"
-    : `↘️ Change from ${i.BlrA} to ${i.BlrB};`;
-  out.SummaryChange.add(summary);
+const RULES = {
+  SummaryChange: [
+    {
+      when: ({inputs}) => inputs.BlrA===inputs.BlrB && inputs.CylA===inputs.CylB,
+      produce: ({inputs}) => [`↘️ Like for like;`]
+    },
+    {
+      when: () => true,
+      produce: ({inputs}) => [`↘️ Change from ${inputs.BlrA} to ${inputs.BlrB};`]
+    }
+  ],
+  SystemChanges: [
+    {
+      when: ({inputs, flags}) => flags.B_isCombi && inputs.CylA!=="NONE",
+      notes: ["remove_cylinder","space_gain"]
+    },
+    {
+      when: ({inputs, flags}) => flags.A_isVented && (flags.B_isCombi || (flags.B_isSystem && inputs.CylB!=="VENTED_TANKED")),
+      notes: ["remove_FandE"]
+    },
+    {
+      when: ({flags}) => flags.B_needsCylinder && flags.Loc_change,
+      notes: ["cylinder_relocation"]
+    }
+  ],
+  HotWater: [
+    { when: () => true, notes: ["cold_main_check"] },
+    { when: ({flags}) => flags.B_isCombi, notes: ["combi_performance"] },
+    { when: ({inputs}) => inputs.CylB==="UNVENTED_MAINS", notes: ["unvented_requirements","unvented_benefit"] },
+    {
+      when: ({inputs}) => ["VENTED_TANKED","FORTIC_COMBINED","PRIMATIC"].includes(inputs.CylB),
+      notes: ["vented_characteristics"]
+    },
+    { when: ({inputs}) => inputs.CylB==="THERMAL_STORE", notes: ["thermal_store_specifics"] }
+  ],
+  Flue: [
+    { when: ({flags}) => flags.Flu_change, notes: ["flue_clearances"] },
+    {
+      when: ({inputs}) => ["H_BALANCED","V_BALANCED","PLUME_KIT"].includes(inputs.FluB),
+      notes: ["flue_clearances"]
+    },
+    { when: ({inputs}) => ["PLUME_KIT","H_BALANCED"].includes(inputs.FluB), notes: ["plume_mitigation"] },
+    { when: ({flags}) => flags.Term_low, notes: ["terminal_guard_required"] },
+    { when: ({flags}) => flags.Term_boundary, notes: ["boundary_clearance_review"] },
+    { when: ({flags}) => flags.Chimney_to_RS, notes: ["chimney_decommission"] }
+  ],
+  Gas: [
+    { when: () => true, notes: ["gas_supply_check"] }
+  ],
+  Condensate: [
+    { when: () => true, notes: ["condensate_route"] }
+  ],
+  LocationAndMakingGood: [
+    { when: () => true, notes: ["loc_old_new"] }
+  ],
+  Controls: [
+    { when: () => true, notes: ["controls_reconfig"] }
+  ],
+  HouseKeeping: [
+    { when: () => true, notes: ["system_cleanse","trvs_balancing"] }
+  ]
+};
 
-  // System changes
-  if (f.B_isCombi && i.CylA!=="NONE"){ out.SystemChanges.add("remove_cylinder"); out.SystemChanges.add("space_gain"); }
-  if (f.A_isVented && (f.B_isCombi || (f.B_isSystem && i.CylB!=="VENTED_TANKED"))){ out.SystemChanges.add("remove_FandE"); }
-  if (f.B_needsCylinder && f.Loc_change){ out.SystemChanges.add("cylinder_relocation"); }
-
-  // Hot water — ALWAYS populate based on proposed
-  out.HotWater.add("cold_main_check");
-  if (f.B_isCombi){
-    out.HotWater.add("combi_performance");
-  } else if (i.CylB==="UNVENTED_MAINS"){
-    out.HotWater.add("unvented_requirements");
-    out.HotWater.add("unvented_benefit");
-  } else if (["VENTED_TANKED","FORTIC_COMBINED","PRIMATIC"].includes(i.CylB)){
-    out.HotWater.add("vented_characteristics");
-  } else if (i.CylB==="THERMAL_STORE"){
-    out.HotWater.add("thermal_store_specifics");
+function applyRules(ctx){
+  const output = {};
+  for(const key of SECTION_KEYS){
+    output[key] = new Set();
   }
 
-  // Flue
-  if (f.Flu_change){ out.Flue.add("flue_clearances"); }
-  // Balanced/plume/location specific
-  if (["H_BALANCED","V_BALANCED","PLUME_KIT"].includes(i.FluB)) out.Flue.add("flue_clearances");
-  if (i.FluB==="PLUME_KIT" || i.FluB==="H_BALANCED") out.Flue.add("plume_mitigation");
-  if (f.Term_low) out.Flue.add("terminal_guard_required");
-  if (f.Term_boundary) out.Flue.add("boundary_clearance_review");
-  if (f.Chimney_to_RS) out.Flue.add("chimney_decommission");
+  // Summary processed separately to capture literal text
+  for (const rule of RULES.SummaryChange){
+    if (rule.when(ctx)){
+      for (const line of rule.produce(ctx)){
+        output.SummaryChange.add(line);
+      }
+      break;
+    }
+  }
 
-  // Gas / Condensate (universal sanity)
-  out.Gas.add("gas_supply_check");
-  out.Condensate.add("condensate_route");
+  for (const key of SECTION_KEYS){
+    if (key==="SummaryChange") continue;
+    const rules = RULES[key] || [];
+    for (const rule of rules){
+      if (rule.when(ctx)){
+        for (const note of rule.notes){
+          output[key].add(note);
+        }
+      }
+    }
+  }
 
-  // Locations / Controls / Housekeeping
-  out.LocationAndMakingGood.add("loc_old_new");
-  out.Controls.add("controls_reconfig");
-  out.HouseKeeping.add("system_cleanse"); out.HouseKeeping.add("trvs_balancing");
+  return output;
+}
 
-  return out;
+// ---- Rule engine: returns set of note keys per section
+function resolve(inputs){
+  const ctx = { inputs, flags: flags(inputs) };
+  return applyRules(ctx);
 }
 
 // ---- Render sections with copy buttons
