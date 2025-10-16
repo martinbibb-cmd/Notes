@@ -1,13 +1,13 @@
 {
   "boiler_notes": {
-    "a1": "Remove existing regular boiler and associated wiring.",
-    "a2": "Remove existing system boiler and wiring centre.",
+    "a1": "Remove existing regular boiler.",
+    "a2": "Remove existing system boiler.",
     "a3": "Remove existing combination boiler and flue.",
     "a4": "Remove existing warm air unit and redundant ducting.",
     "a5": "No existing boiler on site.",
-    "b1": "Install new regular boiler on open vented circuit with new wiring centre.",
-    "b2": "Install new system boiler on sealed system with integrated pump and expansion vessel.",
-    "b3": "Install new combination boiler with integrated filling loop and DHW outlets."
+    "b1": "Install new regular boiler on open-vented circuit.",
+    "b2": "Install new system boiler on sealed heating circuit.",
+    "b3": "Install new combination boiler with integrated filling loop."
   },
   "flue_notes": {
     "a1": "Remove existing horizontal flue terminal and wall sleeve.",
@@ -16,25 +16,25 @@
     "a5": "Remove existing open flue and make good.",
     "b1a": "Install new fanned flue horizontal kit with wall terminal.",
     "b4": "Install new vertical flue through roof with approved flashing kit.",
-    "t1": "Ensure terminal clearances comply with BS 5440.",
+    "t1": "Ensure flue terminal clearances comply with BS 5440.",
     "t2": "Add plume kit with extensions and 45° elbows as required."
   },
   "notes": {
     "convert_to_sealed": "System will be converted from open vent to sealed.",
-    "keep_open_vent": "System remains open vented with existing feed and expansion tanks retained.",
-    "remove_fe_tanks": "Remove feed and expansion tanks and cap redundant pipework.",
-    "dhw_now_mains": "Hot water will be mains pressure; confirm compatibility of showers and taps.",
-    "remove_shower_pumps": "Remove any shower pumps; not suitable for pressurised systems.",
-    "g3_req": "Unvented cylinder installation to be completed by a G3-certified engineer; provide discharge pipework and tundish as per Building Regulations.",
-    "remove_vented_cyl": "Remove vented cylinder and associated cold water storage.",
-    "retain_vented_cyl": "Retain vented cylinder and cold water storage; check condition and insulation.",
-    "retain_unvented": "Retain existing unvented cylinder; confirm annual service and verify discharge/mixing arrangements.",
+    "keep_open_vent": "System remains open vented; existing F&E arrangements retained.",
+    "remove_fe_tanks": "Remove feed and expansion tanks and cap redundant connections.",
+    "dhw_now_mains": "Hot water will be mains pressure; confirm shower/tap compatibility.",
+    "remove_shower_pumps": "Remove any shower pumps; not suitable for pressurised DHW.",
+    "g3_req": "Unvented cylinder to be installed/maintained by G3-qualified engineer; discharge and tundish per regulations.",
+    "remove_vented_cyl": "Remove vented cylinder and cold water storage.",
+    "retain_vented_cyl": "Retain vented cylinder; check insulation/condition.",
+    "retain_unvented": "Retain existing unvented cylinder; confirm service history and discharge route.",
     "no_replacement_cyl": "No replacement cylinder required (combi upgrade).",
-    "install_unvented": "Install unvented cylinder with pressure reducing valve and compliant discharge to outside.",
+    "install_unvented": "Install unvented cylinder with PRV and compliant discharge to outside.",
     "fanned_horizontal": "Install fanned horizontal flue to manufacturer instructions.",
-    "fanned_vertical": "Install fanned vertical flue through roof with approved flashing kit.",
-    "terminal_clearances": "Ensure flue terminal clearances comply with BS 5440.",
-    "plume_kit": "Add plume kit with extensions or elbows as required.",
-    "no_plume_needed": "Standard terminal only; plume kit not required."
+    "fanned_vertical": "Install fanned vertical flue with approved flashing kit.",
+    "terminal_clearances": "Confirm and record terminal clearances.",
+    "plume_kit": "Plume management kit required.",
+    "no_plume_needed": "Plume kit not required."
   }
 }
