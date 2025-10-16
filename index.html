@@ -1,500 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Boiler Mapper</title>
-  <style>
-    :root {
-      color-scheme: dark;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      background: #0b0d10;
-      color: #e9eef5;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      margin: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(1.8rem, 2.5vw, 2.6rem);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    fieldset {
-      border: 1px solid #2a323c;
-      padding: 14px;
-      margin: 0;
-      border-radius: 10px;
-      min-width: 260px;
-      flex: 1 1 280px;
-      background: rgba(18, 23, 28, 0.6);
-    }
-    legend {
-      padding: 0 6px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    select,
-    button,
-    textarea {
-      margin: 5px 0 12px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      border: 1px solid #2a323c;
-      background: #151a1f;
-      color: #e9eef5;
-      font-size: 0.95rem;
-      width: 100%;
-    }
-    select:focus,
-    button:focus,
-    textarea:focus {
-      outline: 2px solid #3d6cf3;
-      outline-offset: 2px;
-    }
-    button {
-      width: auto;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      transition: background 0.2s ease;
-    }
-    button:hover {
-      background: #1f2630;
-      cursor: pointer;
-    }
-    button.copy {
-      padding: 6px 12px;
-      font-size: 0.75rem;
-    }
-    .grid {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-    .sections {
-      display: grid;
-      gap: 18px;
-    }
-    @media (min-width: 800px) {
-      .sections {
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-    }
-    .section {
-      background: rgba(18, 23, 28, 0.6);
-      border: 1px solid #2a323c;
-      border-radius: 10px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-height: 220px;
-    }
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-    .section-header h2 {
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin: 0;
-    }
-    textarea {
-      resize: vertical;
-      min-height: 140px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-    }
-    .section textarea {
-      margin: 0;
-    }
-    .foot-actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Boiler Mapper</title>
+<style>
+:root{--bg:#0b0d10;--panel:#151a1f;--ink:#e9eef5;--muted:#9fb0c2;--line:#2a323c;--accent:#4aa3ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+header{padding:14px 16px;border-bottom:1px solid var(--line);background:linear-gradient(0deg,#0b0d10,#0f1216)}
+h1{margin:0;font-size:18px}
+main{padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+fieldset{border:1px solid var(--line);border-radius:8px;padding:12px}
+legend{padding:0 6px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+select,button,textarea{border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+select,button{padding:8px}
+textarea{width:100%;min-height:120px;padding:10px;resize:vertical}
+button:hover{background:#1c232b;cursor:pointer}
+.section{margin-top:18px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.copy{padding:8px 10px}
+.note{font-size:12px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:12px 16px;color:var(--muted)}
+</style>
 </head>
 <body>
-  <h1>Boiler Mapper</h1>
+<header><h1>Boiler Mapper</h1></header>
+<main>
   <div class="grid">
     <fieldset>
       <legend>Current System (A)</legend>
-      <label for="BlrA">Boiler Type
+      <div class="row">
+        <label>Boiler</label>
         <select id="BlrA">
-          <option value="REGULAR">REGULAR</option>
-          <option value="SYSTEM">SYSTEM</option>
-          <option value="COMBI">COMBI</option>
-          <option value="BBU">BBU</option>
-          <option value="WARM_AIR">WARM_AIR</option>
-          <option value="ELECTRIC_WET">ELECTRIC_WET</option>
+          <option>REGULAR</option><option>SYSTEM</option><option>COMBI</option>
+          <option>BBU</option><option>WARM_AIR</option><option>ELECTRIC_WET</option>
         </select>
-      </label>
-      <label for="FluA">Flue Type
+      </div>
+      <div class="row">
+        <label>Flue</label>
         <select id="FluA">
-          <option value="HORIZONTAL">HORIZONTAL</option>
-          <option value="VERTICAL">VERTICAL</option>
-          <option value="PLUME_KIT">PLUME_KIT</option>
-          <option value="CHIMNEY">CHIMNEY</option>
+          <option>H_BALANCED</option><option>V_BALANCED</option>
+          <option>PLUME_KIT</option><option>OPEN_FLUE</option>
+          <option>CHIMNEY</option>
         </select>
-      </label>
-      <label for="CylA">Cylinder
+      </div>
+      <div class="row">
+        <label>Cylinder</label>
         <select id="CylA">
-          <option value="NONE">NONE</option>
-          <option value="VENTED_TANKED">VENTED_TANKED</option>
-          <option value="UNVENTED_MAINS">UNVENTED_MAINS</option>
-          <option value="THERMAL_STORE">THERMAL_STORE</option>
-          <option value="FORTIC_COMBINED">FORTIC_COMBINED</option>
-          <option value="PRIMATIC">PRIMATIC</option>
+          <option>NONE</option><option>VENTED_TANKED</option><option>UNVENTED_MAINS</option>
+          <option>THERMAL_STORE</option><option>FORTIC_COMBINED</option><option>PRIMATIC</option>
         </select>
-      </label>
-      <label for="LocA">Location
+      </div>
+      <div class="row">
+        <label>Location</label>
         <select id="LocA">
-          <option value="KITCHEN">KITCHEN</option>
-          <option value="GARAGE">GARAGE</option>
-          <option value="UTILITY">UTILITY</option>
-          <option value="AIRING_CUPBOARD">AIRING_CUPBOARD</option>
-          <option value="LOFT">LOFT</option>
+          <option>KITCHEN</option><option>GARAGE</option><option>UTILITY</option>
+          <option>AIRING_CUPBOARD</option><option>BEDROOM</option><option>LOFT</option>
+          <option>OUTBUILDING</option><option>OTHER</option>
         </select>
-      </label>
+      </div>
     </fieldset>
 
     <fieldset>
       <legend>Proposed System (B)</legend>
-      <label for="BlrB">Boiler Type
+      <div class="row">
+        <label>Boiler</label>
         <select id="BlrB">
-          <option value="REGULAR">REGULAR</option>
-          <option value="SYSTEM">SYSTEM</option>
-          <option value="COMBI">COMBI</option>
-          <option value="ELECTRIC_WET">ELECTRIC_WET</option>
+          <option>REGULAR</option><option>SYSTEM</option><option>COMBI</option>
+          <option>ELECTRIC_WET</option>
         </select>
-      </label>
-      <label for="FluB">Flue Type
+      </div>
+      <div class="row">
+        <label>Flue</label>
         <select id="FluB">
-          <option value="HORIZONTAL">HORIZONTAL</option>
-          <option value="VERTICAL">VERTICAL</option>
-          <option value="PLUME_KIT">PLUME_KIT</option>
-          <option value="CHIMNEY">CHIMNEY</option>
+          <option>H_BALANCED</option><option>V_BALANCED</option>
+          <option>PLUME_KIT</option><option>OPEN_FLUE</option>
+          <option>CHIMNEY</option>
         </select>
-      </label>
-      <label for="CylB">Cylinder
+      </div>
+      <div class="row">
+        <label>Cylinder</label>
         <select id="CylB">
-          <option value="NONE">NONE</option>
-          <option value="VENTED_TANKED">VENTED_TANKED</option>
-          <option value="UNVENTED_MAINS">UNVENTED_MAINS</option>
-          <option value="THERMAL_STORE">THERMAL_STORE</option>
+          <option>NONE</option><option>VENTED_TANKED</option><option>UNVENTED_MAINS</option>
+          <option>THERMAL_STORE</option>
         </select>
-      </label>
-      <label for="LocB">Location
+      </div>
+      <div class="row">
+        <label>Location</label>
         <select id="LocB">
-          <option value="KITCHEN">KITCHEN</option>
-          <option value="GARAGE">GARAGE</option>
-          <option value="UTILITY">UTILITY</option>
-          <option value="AIRING_CUPBOARD">AIRING_CUPBOARD</option>
-          <option value="LOFT">LOFT</option>
+          <option>KITCHEN</option><option>GARAGE</option><option>UTILITY</option>
+          <option>AIRING_CUPBOARD</option><option>BEDROOM</option><option>LOFT</option>
+          <option>OUTBUILDING</option><option>OTHER</option>
         </select>
-      </label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Flue Terminal Location</legend>
+      <div class="row">
+        <label>Terminal Wall</label>
+        <select id="TermWall">
+          <option>REAR</option><option>FRONT</option><option>LEFT_SIDE</option><option>RIGHT_SIDE</option>
+          <option>COURTYARD</option><option>ALLEY</option><option>NEAR_BOUNDARY</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Terminal Height</label>
+        <select id="TermHeight">
+          <option>LOW_LT_2M</option><option>MID_2_TO_2_5M</option><option>HIGH_GT_2_5M</option>
+        </select>
+      </div>
+      <p class="note">Balanced flues are room-sealed (concentric/twin). Terminal wall/height affects guards, plume and boundary clearances.</p>
     </fieldset>
   </div>
 
-  <div class="actions">
-    <button id="generate">Generate Notes</button>
+  <div class="tools">
+    <button onclick="generate()">Generate Notes</button>
+    <button onclick="copyAll()">Copy All</button>
   </div>
 
-  <div class="sections" id="sections">
-    <div class="section" data-section="SummaryChange">
-      <div class="section-header">
-        <h2>SummaryChange</h2>
-        <button class="copy" data-copy="SummaryChange">Copy</button>
-      </div>
-      <textarea id="SummaryChange" rows="6" placeholder="↘️ Summary lines will appear here;"></textarea>
-    </div>
-    <div class="section" data-section="SystemChanges">
-      <div class="section-header">
-        <h2>SystemChanges</h2>
-        <button class="copy" data-copy="SystemChanges">Copy</button>
-      </div>
-      <textarea id="SystemChanges" rows="6" placeholder="↘️ System change notes;"></textarea>
-    </div>
-    <div class="section" data-section="HotWater">
-      <div class="section-header">
-        <h2>HotWater</h2>
-        <button class="copy" data-copy="HotWater">Copy</button>
-      </div>
-      <textarea id="HotWater" rows="6" placeholder="↘️ Hot water notes;"></textarea>
-    </div>
-    <div class="section" data-section="Flue">
-      <div class="section-header">
-        <h2>Flue</h2>
-        <button class="copy" data-copy="Flue">Copy</button>
-      </div>
-      <textarea id="Flue" rows="4" placeholder="↘️ Flue notes;"></textarea>
-    </div>
-    <div class="section" data-section="Gas">
-      <div class="section-header">
-        <h2>Gas</h2>
-        <button class="copy" data-copy="Gas">Copy</button>
-      </div>
-      <textarea id="Gas" rows="4" placeholder="↘️ Gas notes;"></textarea>
-    </div>
-    <div class="section" data-section="Condensate">
-      <div class="section-header">
-        <h2>Condensate</h2>
-        <button class="copy" data-copy="Condensate">Copy</button>
-      </div>
-      <textarea id="Condensate" rows="4" placeholder="↘️ Condensate notes;"></textarea>
-    </div>
-    <div class="section" data-section="LocationAndMakingGood">
-      <div class="section-header">
-        <h2>LocationAndMakingGood</h2>
-        <button class="copy" data-copy="LocationAndMakingGood">Copy</button>
-      </div>
-      <textarea id="LocationAndMakingGood" rows="6" placeholder="↘️ Location / making good notes;"></textarea>
-    </div>
-    <div class="section" data-section="Controls">
-      <div class="section-header">
-        <h2>Controls</h2>
-        <button class="copy" data-copy="Controls">Copy</button>
-      </div>
-      <textarea id="Controls" rows="4" placeholder="↘️ Controls notes;"></textarea>
-    </div>
-    <div class="section" data-section="HouseKeeping">
-      <div class="section-header">
-        <h2>HouseKeeping</h2>
-        <button class="copy" data-copy="HouseKeeping">Copy</button>
-      </div>
-      <textarea id="HouseKeeping" rows="4" placeholder="↘️ House keeping notes;"></textarea>
-    </div>
-  </div>
+  <div id="sections"></div>
+</main>
+<footer>↘️ Output uses semicolons for easy paste; balanced flues, plume and terminal rules included.</footer>
 
-  <div class="foot-actions">
-    <button id="copy-all">Copy All Sections</button>
-  </div>
+<script>
+// ---- Logic notes grouped by section
+const NOTES = {
+  SystemChanges: {
+    remove_cylinder:"↘️ Remove existing hot-water cylinder and associated components;",
+    space_gain:"↘️ Space reclaimed from cylinder/loft tanks — confirm preferred use;",
+    remove_FandE:"↘️ Remove F&E tanks and convert to sealed system where applicable;",
+    cylinder_relocation:"↘️ New cylinder location — allow primary/secondary runs and compliant discharge path;"
+  },
+  HotWater: {
+    combi_performance:"↘️ Combi hot-water performance depends on mains flow; simultaneous draws reduce flow/temperature;",
+    cold_main_check:"↘️ Verify incoming cold main flow/pressure meets combi/unvented requirements; upgrade if inadequate;",
+    unvented_requirements:"↘️ Provide unvented G3 safety set, correctly sized discharge (D2) and termination; confirm main capacity;",
+    unvented_benefit:"↘️ Unvented cylinder provides mains-pressure hot water at multiple outlets (subject to main capacity);",
+    vented_characteristics:"↘️ Vented cylinder performance depends on tank head height; consider shower pump where appropriate;",
+    thermal_store_specifics:"↘️ Thermal store: confirm compatibility, heat source interfaces and delivery temperatures;"
+  },
+  Flue: {
+    flue_clearances:"↘️ Check flue type/route/terminal clearances vs MI; confirm guards and plume management if needed;",
+    terminal_guard_required:"↘️ Terminal <2 m above ground or accessible — provide terminal guard as required;",
+    boundary_clearance_review:"↘️ Terminal near boundary/front/alley — confirm boundary clearances and neighbour impact;",
+    plume_mitigation:"↘️ Anticipated plume — consider plume kit/deflector to protect paths, windows and boundaries;",
+    chimney_decommission:"↘️ Decommission/liner considerations for chimney/open flue; cap and make good as required;"
+  },
+  Gas: {
+    gas_supply_check:"↘️ Confirm gas pipe sizing and route for new input rating; upgrade if required;"
+  },
+  Condensate: {
+    condensate_route:"↘️ Confirm compliant condensate route and termination;"
+  },
+  LocationAndMakingGood: {
+    loc_old_new:"↘️ Old location: {LocA} — decommission/make good; New location: {LocB} — confirm mounting clearances and access;"
+  },
+  Controls: {
+    controls_reconfig:"↘️ Configure for {BlrB} operation; confirm room/cylinder controls as specified;"
+  },
+  HouseKeeping: {
+    system_cleanse:"↘️ Cleanse system and dose inhibitor; fit system filter as specified;",
+    trvs_balancing:"↘️ Fit/verify TRVs where required and balance system on completion;"
+  }
+};
 
-  <script>
-    const logic = {
-      notes: {
-        remove_cylinder: "↘️ Remove existing hot-water cylinder and associated components;",
-        space_gain: "↘️ Space reclaimed from cylinder/loft tanks — confirm preferred use;",
-        remove_FandE: "↘️ Remove F&E tanks and convert to sealed system where applicable;",
-        cold_main_check: "↘️ Verify incoming cold main flow/pressure meets combi/unvented requirements; upgrade if inadequate;",
-        customer_expectations_combi: "↘️ Combi hot-water performance depends on mains flow; simultaneous draws reduce flow/temperature;",
-        unvented_requirements: "↘️ Provide unvented G3 safety set, correctly sized discharge (D2) and termination; confirm main capacity;",
-        customer_expectations_unvented: "↘️ Unvented cylinder provides mains-pressure hot water at multiple outlets (subject to main capacity);",
-        cylinder_relocation: "↘️ New cylinder location — allow primary/secondary runs and compliant discharge path;",
-        gas_supply_check: "↘️ Confirm gas pipe sizing and route for new input rating; upgrade if required;",
-        condensate_route: "↘️ Confirm compliant condensate route and termination;",
-        flue_clearances: "↘️ Check flue type/route/terminal clearances vs MI; confirm guards, plume management if needed;",
-        system_cleanse: "↘️ Cleanse system and dose inhibitor; fit system filter as specified;",
-        trvs_balancing: "↘️ Fit/verify TRVs where required and balance system on completion;"
-      },
-      rules: [
-        { when: f => f.B_isCombi && f.A_hasCylinder, add: ["remove_cylinder", "space_gain"] },
-        { when: f => f.B_isCombi, add: ["cold_main_check", "customer_expectations_combi"] },
-        { when: f => f.B_isSystem && f.CylB === "UNVENTED_MAINS", add: ["unvented_requirements", "customer_expectations_unvented"] },
-        { when: f => f.B_needsCylinder && f.Loc_change, add: ["cylinder_relocation"] },
-        { when: f => f.A_isVented && (f.B_isCombi || (f.B_isSystem && f.CylB !== "VENTED_TANKED")), add: ["remove_FandE"] },
-        { when: f => f.Flu_change, add: ["flue_clearances"] },
-        { when: f => true, add: ["gas_supply_check", "condensate_route", "system_cleanse", "trvs_balancing"] }
-      ]
-    };
+// ---- Helper: derive flags
+function flags(i){
+  return {
+    A_hasCylinder: i.CylA!=="NONE",
+    A_isVented: ["VENTED_TANKED","FORTIC_COMBINED","PRIMATIC"].includes(i.CylA),
+    A_isUnvented: i.CylA==="UNVENTED_MAINS",
+    B_isCombi: i.BlrB==="COMBI",
+    B_isSystem: i.BlrB==="SYSTEM",
+    B_isRegular: i.BlrB==="REGULAR",
+    B_needsCylinder: ["SYSTEM","REGULAR"].includes(i.BlrB) && i.CylB!=="NONE",
+    Flu_change: i.FluA!==i.FluB,
+    Chimney_to_RS: (["OPEN_FLUE","CHIMNEY"].includes(i.FluA) && ["H_BALANCED","V_BALANCED","PLUME_KIT"].includes(i.FluB)),
+    Term_low: i.TermHeight==="LOW_LT_2M",
+    Term_boundary: ["FRONT","ALLEY","NEAR_BOUNDARY","COURTYARD"].includes(i.TermWall),
+    Loc_change: i.LocA!==i.LocB
+  };
+}
 
-    const noteSections = {
-      remove_cylinder: "HotWater",
-      space_gain: "LocationAndMakingGood",
-      remove_FandE: "SystemChanges",
-      cold_main_check: "HotWater",
-      customer_expectations_combi: "HotWater",
-      unvented_requirements: "HotWater",
-      customer_expectations_unvented: "HotWater",
-      cylinder_relocation: "LocationAndMakingGood",
-      gas_supply_check: "Gas",
-      condensate_route: "Condensate",
-      flue_clearances: "Flue",
-      system_cleanse: "SystemChanges",
-      trvs_balancing: "SystemChanges"
-    };
+// ---- Rule engine: returns set of note keys per section
+function resolve(i){
+  const f = flags(i);
+  const out = {
+    SummaryChange: new Set(),
+    SystemChanges: new Set(),
+    HotWater: new Set(),
+    Flue: new Set(),
+    Gas: new Set(),
+    Condensate: new Set(),
+    LocationAndMakingGood: new Set(),
+    Controls: new Set(),
+    HouseKeeping: new Set()
+  };
 
-    const sectionOrder = [
-      "SummaryChange",
-      "SystemChanges",
-      "HotWater",
-      "Flue",
-      "Gas",
-      "Condensate",
-      "LocationAndMakingGood",
-      "Controls",
-      "HouseKeeping"
-    ];
+  // Summary
+  const summary = (i.BlrA===i.BlrB && i.CylA===i.CylB)
+    ? "↘️ Like for like;"
+    : `↘️ Change from ${i.BlrA} to ${i.BlrB};`;
+  out.SummaryChange.add(summary);
 
-    function deriveFlags(i) {
-      return {
-        A_hasCylinder: i.CylA !== "NONE",
-        A_isVented: ["VENTED_TANKED", "FORTIC_COMBINED", "PRIMATIC"].includes(i.CylA),
-        B_isCombi: i.BlrB === "COMBI",
-        B_isSystem: i.BlrB === "SYSTEM",
-        B_needsCylinder: ["SYSTEM", "REGULAR"].includes(i.BlrB) && i.CylB !== "NONE",
-        Flu_change: i.FluA !== i.FluB,
-        Loc_change: i.LocA !== i.LocB
-      };
-    }
+  // System changes
+  if (f.B_isCombi && i.CylA!=="NONE"){ out.SystemChanges.add("remove_cylinder"); out.SystemChanges.add("space_gain"); }
+  if (f.A_isVented && (f.B_isCombi || (f.B_isSystem && i.CylB!=="VENTED_TANKED"))){ out.SystemChanges.add("remove_FandE"); }
+  if (f.B_needsCylinder && f.Loc_change){ out.SystemChanges.add("cylinder_relocation"); }
 
-    function buildNoteKeys(input) {
-      const flags = deriveFlags(input);
-      const active = [];
-      for (const rule of logic.rules) {
-        if (rule.when(flags)) {
-          active.push(...rule.add);
-        }
-      }
-      return [...new Set(active)];
-    }
+  // Hot water — ALWAYS populate based on proposed
+  out.HotWater.add("cold_main_check");
+  if (f.B_isCombi){
+    out.HotWater.add("combi_performance");
+  } else if (i.CylB==="UNVENTED_MAINS"){
+    out.HotWater.add("unvented_requirements");
+    out.HotWater.add("unvented_benefit");
+  } else if (["VENTED_TANKED","FORTIC_COMBINED","PRIMATIC"].includes(i.CylB)){
+    out.HotWater.add("vented_characteristics");
+  } else if (i.CylB==="THERMAL_STORE"){
+    out.HotWater.add("thermal_store_specifics");
+  }
 
-    function formatLine(text) {
-      return text.startsWith("↘️") ? text : `↘️ ${text.replace(/;?$/, ';')}`;
-    }
+  // Flue
+  if (f.Flu_change){ out.Flue.add("flue_clearances"); }
+  // Balanced/plume/location specific
+  if (["H_BALANCED","V_BALANCED","PLUME_KIT"].includes(i.FluB)) out.Flue.add("flue_clearances");
+  if (i.FluB==="PLUME_KIT" || i.FluB==="H_BALANCED") out.Flue.add("plume_mitigation");
+  if (f.Term_low) out.Flue.add("terminal_guard_required");
+  if (f.Term_boundary) out.Flue.add("boundary_clearance_review");
+  if (f.Chimney_to_RS) out.Flue.add("chimney_decommission");
 
-    function generateSections(input) {
-      const keys = buildNoteKeys(input);
-      const sections = Object.fromEntries(sectionOrder.map(id => [id, []]));
+  // Gas / Condensate (universal sanity)
+  out.Gas.add("gas_supply_check");
+  out.Condensate.add("condensate_route");
 
-      const title = input.BlrA === input.BlrB ? "Like for like" : `Change from ${input.BlrA} to ${input.BlrB}`;
-      const summaryLines = [
-        formatLine(`${title};`)
-      ];
-      const locationLine = input.LocA === input.LocB
-        ? `↘️ Boiler location unchanged (${input.LocA});`
-        : `↘️ Relocate boiler from ${input.LocA} to ${input.LocB};`;
-      summaryLines.push(locationLine);
-      const flueLine = input.FluA === input.FluB
-        ? `↘️ Flue arrangement retained (${input.FluB});`
-        : `↘️ Adapt flue from ${input.FluA} to ${input.FluB};`;
-      summaryLines.push(flueLine);
-      sections.SummaryChange.push(...summaryLines);
+  // Locations / Controls / Housekeeping
+  out.LocationAndMakingGood.add("loc_old_new");
+  out.Controls.add("controls_reconfig");
+  out.HouseKeeping.add("system_cleanse"); out.HouseKeeping.add("trvs_balancing");
 
-      for (const key of keys) {
-        const section = noteSections[key] || "SystemChanges";
-        sections[section].push(logic.notes[key]);
-      }
+  return out;
+}
 
-      if (sections.Controls.length === 0) {
-        sections.Controls.push("↘️ Confirm controls specification and zoning with client;");
-      }
-      if (sections.HouseKeeping.length === 0) {
-        sections.HouseKeeping.push("↘️ Leave working area clean, remove waste and provide handover pack;");
-      }
+// ---- Render sections with copy buttons
+function renderSections(buckets, inputs){
+  const secEl = document.getElementById("sections");
+  const order = ["SummaryChange","SystemChanges","HotWater","Flue","Gas","Condensate","LocationAndMakingGood","Controls","HouseKeeping"];
+  const sectionTitles = {
+    SummaryChange:"Summary Change",
+    SystemChanges:"System Changes",
+    HotWater:"Hot Water",
+    Flue:"Flue",
+    Gas:"Gas",
+    Condensate:"Condensate",
+    LocationAndMakingGood:"Location & Making Good",
+    Controls:"Controls",
+    HouseKeeping:"Housekeeping"
+  };
 
-      if (sections.LocationAndMakingGood.length === 0) {
-        sections.LocationAndMakingGood.push(locationLine);
-      } else if (!sections.LocationAndMakingGood.includes(locationLine)) {
-        sections.LocationAndMakingGood.unshift(locationLine);
-      }
-
-      return sections;
-    }
-
-    async function copyText(text) {
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          throw new Error('Clipboard API unavailable');
-        }
-      } catch (err) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+  secEl.innerHTML = "";
+  for(const key of order){
+    const wrap = document.createElement("div"); wrap.className="section";
+    const h = document.createElement("h3"); h.textContent = sectionTitles[key]; wrap.appendChild(h);
+    const ta = document.createElement("textarea"); ta.id = "ta_"+key;
+    const lines = [];
+    for(const noteKey of buckets[key]){
+      if (key==="SummaryChange" && noteKey.startsWith("↘️")) { lines.push(noteKey); }
+      else {
+        const src = NOTES[key][noteKey] || "";
+        const line = src.replace("{LocA}", document.getElementById("LocA").value)
+                        .replace("{LocB}", document.getElementById("LocB").value)
+                        .replace("{BlrB}", document.getElementById("BlrB").value);
+        if (line) lines.push(line);
       }
     }
-
-    function populateSections(sections) {
-      for (const id of sectionOrder) {
-        const textarea = document.getElementById(id);
-        if (!textarea) continue;
-        textarea.value = sections[id].join('\n');
-      }
+    // Guarantee HotWater has at least one line (belt-and-braces)
+    if (key==="HotWater" && lines.length===0){
+      lines.push("↘️ Verify incoming cold main flow/pressure meets specification;");
     }
+    ta.value = lines.join("\n");
+    wrap.appendChild(ta);
+    const btn = document.createElement("button"); btn.className="copy"; btn.textContent="Copy";
+    btn.onclick = ()=>{ ta.select(); document.execCommand("copy"); };
+    wrap.appendChild(btn);
+    document.getElementById("sections").appendChild(wrap);
+  }
+}
 
-    function collectInput() {
-      const get = id => document.getElementById(id).value;
-      return {
-        BlrA: get('BlrA'),
-        FluA: get('FluA'),
-        CylA: get('CylA'),
-        LocA: get('LocA'),
-        BlrB: get('BlrB'),
-        FluB: get('FluB'),
-        CylB: get('CylB'),
-        LocB: get('LocB')
-      };
-    }
-
-    document.getElementById('generate').addEventListener('click', () => {
-      const input = collectInput();
-      const sections = generateSections(input);
-      populateSections(sections);
-    });
-
-    document.querySelectorAll('button.copy').forEach(btn => {
-      btn.addEventListener('click', async event => {
-        const id = event.currentTarget.dataset.copy;
-        const textarea = document.getElementById(id);
-        if (textarea) {
-          await copyText(textarea.value);
-          event.currentTarget.textContent = 'Copied!';
-          setTimeout(() => {
-            event.currentTarget.textContent = 'Copy';
-          }, 1500);
-        }
-      });
-    });
-
-    document.getElementById('copy-all').addEventListener('click', async () => {
-      const combined = sectionOrder
-        .map(id => {
-          const textarea = document.getElementById(id);
-          return `${id}:\n${textarea ? textarea.value : ''}`;
-        })
-        .join('\n\n');
-      await copyText(combined.trim());
-      const button = document.getElementById('copy-all');
-      button.textContent = 'Copied All!';
-      setTimeout(() => {
-        button.textContent = 'Copy All Sections';
-      }, 1500);
-    });
-
-    populateSections(generateSections(collectInput()));
-  </script>
+// ---- Generate + Copy helpers
+function read(id){ return document.getElementById(id).value; }
+function generate(){
+  const inputs = {
+    BlrA:read("BlrA"), FluA:read("FluA"), CylA:read("CylA"), LocA:read("LocA"),
+    BlrB:read("BlrB"), FluB:read("FluB"), CylB:read("CylB"), LocB:read("LocB"),
+    TermWall:read("TermWall"), TermHeight:read("TermHeight")
+  };
+  const bucketSets = resolve(inputs);
+  // Convert sets to arrays to preserve order as inserted
+  const buckets = {};
+  for(const k in bucketSets){ buckets[k] = Array.from(bucketSets[k]); }
+  renderSections(buckets, inputs);
+}
+function copyAll(){
+  const ids=["SummaryChange","SystemChanges","HotWater","Flue","Gas","Condensate","LocationAndMakingGood","Controls","HouseKeeping"]
+    .map(k=>"ta_"+k);
+  const all = ids.map(id=>document.getElementById(id)?.value||"").join("\n");
+  const ta = document.createElement("textarea"); ta.style.position="fixed"; ta.style.left="-9999px"; ta.value = all;
+  document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+  alert("All sections copied");
+}
+</script>
 </body>
 </html>
